@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FirstNest Finland | Nordic First-Home Companion</title>
+  <meta
+    name="description"
+    content="A calm, premium Nordic first-home platform for Finland, helping both immigrants and Finns buy their first home with confidence."
+  />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Prata&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+
+  <header class="site-header container" id="top">
+    <a class="brand" href="#top" aria-label="FirstNest Finland home">
+      <span class="brand-mark" aria-hidden="true">FN</span>
+      <span class="brand-text">FirstNest Finland</span>
+    </a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="#pathways">Pathways</a>
+      <a href="#calculator">Budget</a>
+      <a href="#timeline">Process</a>
+      <a href="#resources">Support</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero container reveal">
+      <div class="hero-copy">
+        <p class="eyebrow">Exclusive Calm Nordic Experience</p>
+        <h1>Your first home in Finland, handled with clarity and dignity.</h1>
+        <p class="lead">
+          A thoughtful home-buying companion for everyone purchasing for the first time,
+          whether you are Finnish-born, newly arrived, or building your family future here.
+        </p>
+        <div class="hero-actions">
+          <a class="button button-primary" href="#calculator">Estimate Your Budget</a>
+          <a class="button button-quiet" href="#pathways">Find Your Pathway</a>
+        </div>
+      </div>
+      <aside class="hero-panel reveal" aria-label="Trust highlights">
+        <h2>Designed to reduce uncertainty.</h2>
+        <ul role="list">
+          <li><strong>Transparent lending</strong><span>Compare offers beyond rates</span></li>
+          <li><strong>Inclusive onboarding</strong><span>Support for immigrants and Finns</span></li>
+          <li><strong>Practical timeline</strong><span>12 milestones from planning to move-in</span></li>
+        </ul>
+      </aside>
+    </section>
+
+    <section class="metrics container reveal" aria-label="Platform highlights">
+      <article>
+        <p>Buyer pathways</p>
+        <strong>4</strong>
+      </article>
+      <article>
+        <p>Action milestones</p>
+        <strong>12</strong>
+      </article>
+      <article>
+        <p>Planned languages</p>
+        <strong>3</strong>
+      </article>
+      <article>
+        <p>Core promise</p>
+        <strong>Fair first buying</strong>
+      </article>
+    </section>
+
+    <section class="pathways container" id="pathways">
+      <div class="section-head reveal">
+        <p class="eyebrow">Guided Journeys</p>
+        <h2>Choose the path that fits your first-home context.</h2>
+      </div>
+
+      <div class="chip-row reveal" role="tablist" aria-label="Buyer pathway filters">
+        <button class="chip is-active" data-filter="all" role="tab" aria-selected="true">All Buyers</button>
+        <button class="chip" data-filter="immigrant" role="tab" aria-selected="false">Immigrant / Newcomer</button>
+        <button class="chip" data-filter="finn" role="tab" aria-selected="false">Finnish Citizen</button>
+        <button class="chip" data-filter="family" role="tab" aria-selected="false">Young Family</button>
+      </div>
+
+      <div class="feature-grid" id="featureGrid">
+        <article class="feature-card reveal" data-tags="immigrant family">
+          <h3>Language and document readiness</h3>
+          <p>Plain-language explanations for contracts, mortgages, and legal obligations before you sign.</p>
+          <ul>
+            <li>Mortgage vocabulary in clear language</li>
+            <li>Document translation and validation list</li>
+            <li>Interpreter-friendly meeting prep cards</li>
+          </ul>
+        </article>
+
+        <article class="feature-card reveal" data-tags="finn family">
+          <h3>Grants and guarantee intelligence</h3>
+          <p>Understand first-home benefits and eligibility quickly by municipality and household profile.</p>
+          <ul>
+            <li>Policy-aware eligibility hints</li>
+            <li>Application readiness checkpoints</li>
+            <li>Deadline and missing-item alerts</li>
+          </ul>
+        </article>
+
+        <article class="feature-card reveal" data-tags="immigrant finn">
+          <h3>Fairness-first lender comparison</h3>
+          <p>Evaluate lenders by total transparency, language support, and service quality.</p>
+          <ul>
+            <li>Fee visibility framework</li>
+            <li>Response-time benchmarking</li>
+            <li>Comparable offer scorecard</li>
+          </ul>
+        </article>
+
+        <article class="feature-card reveal" data-tags="family finn">
+          <h3>Neighborhood decision scoring</h3>
+          <p>Balance schools, transport, safety, and household running costs before you commit.</p>
+          <ul>
+            <li>Transport convenience index</li>
+            <li>Family-services radius view</li>
+            <li>Total monthly lifestyle estimate</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="calculator container" id="calculator">
+      <div class="section-head reveal">
+        <p class="eyebrow">Money Clarity</p>
+        <h2>Get a practical first-home budget in under a minute.</h2>
+      </div>
+
+      <div class="calc-layout">
+        <form class="calc-form reveal" id="budgetForm" novalidate>
+          <label>
+            Net household income per month (EUR)
+            <input type="number" id="income" min="0" value="3600" required />
+          </label>
+          <label>
+            Monthly debt payments (EUR)
+            <input type="number" id="debt" min="0" value="300" required />
+          </label>
+          <label>
+            Savings for down payment (EUR)
+            <input type="number" id="savings" min="0" value="25000" required />
+          </label>
+          <label>
+            Expected interest rate (%)
+            <input type="number" id="rate" min="0.1" step="0.1" value="3.4" required />
+          </label>
+          <label>
+            Loan term (years)
+            <input type="number" id="years" min="5" max="40" value="25" required />
+          </label>
+          <button class="button button-primary" type="submit">Calculate Budget</button>
+        </form>
+
+        <aside class="calc-result reveal" aria-live="polite">
+          <p class="result-label">Estimated comfortable home price</p>
+          <p class="result-value" id="homePrice">EUR 0</p>
+          <p class="result-sub" id="loanAmount">Loan estimate: EUR 0</p>
+          <div class="result-note" id="resultNote">
+            Tip: Most buyers remain safer when housing costs stay below 35% of net monthly income.
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="timeline container" id="timeline">
+      <div class="section-head reveal">
+        <p class="eyebrow">Roadmap</p>
+        <h2>Your 12-step first-home journey.</h2>
+      </div>
+
+      <ol class="timeline-list" role="list">
+        <li class="reveal"><span>1</span>Set your realistic budget and comfort range</li>
+        <li class="reveal"><span>2</span>Review debt, cash flow, and credit profile</li>
+        <li class="reveal"><span>3</span>Prepare identity and financing documents</li>
+        <li class="reveal"><span>4</span>Collect preliminary lender conversations</li>
+        <li class="reveal"><span>5</span>Check first-buyer grants and guarantees</li>
+        <li class="reveal"><span>6</span>Select neighborhoods by daily-life priorities</li>
+        <li class="reveal"><span>7</span>Attend viewings and compare maintenance burden</li>
+        <li class="reveal"><span>8</span>Run legal, technical, and condition checks</li>
+        <li class="reveal"><span>9</span>Negotiate terms with full fee visibility</li>
+        <li class="reveal"><span>10</span>Confirm mortgage and insurance structure</li>
+        <li class="reveal"><span>11</span>Sign deed and complete transfer process</li>
+        <li class="reveal"><span>12</span>Activate post-move budget and emergency fund</li>
+      </ol>
+    </section>
+
+    <section class="resources container" id="resources">
+      <div class="section-head reveal">
+        <p class="eyebrow">Support Layer</p>
+        <h2>Everything needed for a stronger first-home decision.</h2>
+      </div>
+
+      <div class="resource-grid">
+        <article class="resource-card reveal">
+          <h3>Multilingual onboarding</h3>
+          <p>Planned onboarding in Finnish, English, and simplified legal language mode.</p>
+        </article>
+        <article class="resource-card reveal">
+          <h3>Trusted advisor network</h3>
+          <p>Structured access to mortgage, legal, and neighborhood domain experts.</p>
+        </article>
+        <article class="resource-card reveal">
+          <h3>Community confidence</h3>
+          <p>Case stories from buyers across Helsinki, Tampere, Turku, Oulu, and smaller towns.</p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer container reveal">
+    <p>FirstNest Finland. Building fair first-home outcomes for every resident.</p>
+    <a href="#top">Back to top</a>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
