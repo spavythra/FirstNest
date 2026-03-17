@@ -229,6 +229,7 @@ function applyFilters() {
   const maxSize = Number(document.getElementById("filterMaxSize")?.value) || Infinity;
   const minPrice = Number(document.getElementById("filterMinPrice")?.value) || 0;
   const maxPrice = Number(document.getElementById("filterMaxPrice")?.value) || Infinity;
+  const roomsVal = document.getElementById("filterRooms")?.value || "";
 
   const aptChecks = [
     { id: "aptSchools", tag: "Schools" },
@@ -248,6 +249,8 @@ function applyFilters() {
     if (typeVal && l.type !== typeVal) return false;
     if (l.size < minSize || l.size > maxSize) return false;
     if (l.price < minPrice || l.price > maxPrice) return false;
+    if (roomsVal === "4+" && l.rooms < 4) return false;
+    if (roomsVal && roomsVal !== "4+" && l.rooms !== Number(roomsVal)) return false;
     if (activeProfile !== "all" && !l.profile.includes(activeProfile)) return false;
     if (requiredTags.length > 0 && !requiredTags.every((t) => l.tags.includes(t))) return false;
     return true;
