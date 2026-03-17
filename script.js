@@ -194,8 +194,11 @@ function renderListings(listings) {
   if (!grid) return;
 
   if (listings.length === 0) {
-    grid.innerHTML =
-      '<p style="grid-column:1/-1;text-align:center;color:var(--muted);padding:2rem">No listings match your filters.</p>';
+    grid.innerHTML = `
+      <div class="listings-empty">
+        <strong>No properties found</strong>
+        <p>Try adjusting your filters or clearing the area aptness checkboxes.</p>
+      </div>`;
   } else {
     grid.innerHTML = listings.map(buildCard).join("");
   }
