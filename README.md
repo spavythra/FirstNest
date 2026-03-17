@@ -1,4 +1,4 @@
-# FirstNest Finland
+# FirstNest
 
 A calm Nordic-style property platform prototype for first-time home buyers in Finland — built for both newcomers and Finnish citizens navigating the path to homeownership.
 
@@ -10,7 +10,7 @@ This project demonstrates product thinking, inclusive UX design, and front-end i
 
 Buying a first home in Finland is complex. For immigrants, it involves additional layers of language barriers, eligibility uncertainty, and unfamiliar bureaucracy. For young Finnish buyers, loan transparency and municipality nuances remain confusing.
 
-FirstNest Finland frames those challenges into a focused property browsing and guidance platform — combining listing discovery, budget analysis, a step-by-step roadmap, and curated support resources.
+FirstNest frames those challenges into a focused property browsing and guidance platform — combining listing discovery, budget analysis, a step-by-step roadmap, and curated support resources.
 
 ---
 
@@ -45,8 +45,8 @@ No build tools required. Runs directly in-browser.
 ## Run Locally
 
 ```bash
-git clone https://github.com/your-username/uusi_koti.git
-cd uusi_koti
+git clone https://github.com/spavythra/FirstNest.git
+cd FirstNest
 # Open index.html in your browser
 # Or with VS Code Live Server for auto-reload
 ```
@@ -56,7 +56,7 @@ cd uusi_koti
 ## Repository Structure
 
 ```
-uusi_koti/
+FirstNest/
 ├── index.html          # App shell — topbar, sidebar, tabbed content panels
 ├── styles.css          # CSS design system and responsive layout
 ├── script.js           # Tab switching, listing data, filters, budget calculator

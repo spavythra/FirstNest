@@ -1,6 +1,6 @@
-# Contributing to FirstNest Finland
+# Contributing to FirstNest
 
-Thank you for your interest in improving FirstNest Finland.
+Thank you for your interest in improving FirstNest.
 
 ## Development Principles
 
