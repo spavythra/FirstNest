@@ -1,64 +1,97 @@
 # FirstNest Finland
 
-A calm Nordic-style product prototype for first-time home buyers in Finland.
+A calm Nordic-style property platform prototype for first-time home buyers in Finland — built for both newcomers and Finnish citizens navigating the path to homeownership.
 
-This project demonstrates product thinking, inclusive UX, and front-end implementation quality suitable for a portfolio, CV, and GitHub review by technical recruiters.
+This project demonstrates product thinking, inclusive UX design, and front-end implementation quality — suitable for a portfolio, CV, and technical recruiter review.
+
+---
 
 ## Why This Project
 
-First-home buying is complex for everyone, and especially difficult for first-time buyers navigating language barriers, loan transparency, and municipality-specific requirements. FirstNest Finland frames those challenges into a clear, guided experience for both immigrants and Finnish citizens.
+Buying a first home in Finland is complex. For immigrants, it involves additional layers of language barriers, eligibility uncertainty, and unfamiliar bureaucracy. For young Finnish buyers, loan transparency and municipality nuances remain confusing.
 
-## Current Scope
+FirstNest Finland frames those challenges into a focused property browsing and guidance platform — combining listing discovery, budget analysis, a step-by-step roadmap, and curated support resources.
 
-- Premium Nordic visual design with mobile-first responsiveness
-- Buyer-pathway filtering (immigrant, finnish citizen, young family)
-- Affordability/budget calculator with practical financial guidance
-- 12-step first-home roadmap
-- Support modules for multilingual onboarding and trusted advisor workflows
+---
+
+## What It Does
+
+The app is structured like a real property platform (inspired by Etuovi and Oikotie) with four primary areas:
+
+| Tab | Purpose |
+|---|---|
+| **Browse Homes** | Filter and browse mock listings by city, type, price, size, and area aptness |
+| **Budget & Loan** | Affordability calculator with Finnish market rate defaults |
+| **Buying Process** | 12-step first-home roadmap from search to keys |
+| **Support** | Resources for legal, financial, multilingual, and immigrant buyer needs |
+
+**Sidebar filters** let users narrow by location, property type, price range, size, rooms, area aptness signals (schools, transport, services, nature, immigrant support), and buyer profile (All / Newcomer / Finnish / Family).
+
+---
 
 ## Tech Stack
 
-- HTML5
-- CSS3
-- Vanilla JavaScript (ES6)
+| Layer | Choice |
+|---|---|
+| Markup | HTML5 — semantic, ARIA-labelled |
+| Styles | CSS3 — custom property design system, app-shell layout |
+| Logic | Vanilla JavaScript ES6+ — no build tools or dependencies |
+| Fonts | Prata (display serif) + Manrope (UI body) via Google Fonts |
 
-No build tools required for the current static prototype.
+No build tools required. Runs directly in-browser.
+
+---
 
 ## Run Locally
 
-1. Clone the repository.
-2. Open the project folder in VS Code.
-3. Open `index.html` in your browser.
+```bash
+git clone https://github.com/your-username/uusi_koti.git
+cd uusi_koti
+# Open index.html in your browser
+# Or with VS Code Live Server for auto-reload
+```
 
-Optional: use the VS Code Live Server extension for auto-reload while editing.
+---
 
 ## Repository Structure
 
-- `index.html`: main page layout and content
-- `styles.css`: design system and responsive styling
-- `script.js`: calculator logic, filtering, and reveal animations
-- `Docs/requirements.md`: product + technical requirements baseline
-- `Docs/prompting-guide.md`: practical prompt patterns for stronger iterations
-- `CONTRIBUTING.md`: contributor workflow and commit standards
-- `CHANGELOG.md`: release-oriented change tracking
-- `LICENSE`: MIT license for public reuse
+```
+uusi_koti/
+├── index.html          # App shell — topbar, sidebar, tabbed content panels
+├── styles.css          # CSS design system and responsive layout
+├── script.js           # Tab switching, listing data, filters, budget calculator
+├── Docs/
+│   └── requirements.md # Product vision, user segments, functional requirements
+├── CONTRIBUTING.md     # Branch workflow and conventional commit standards
+├── CHANGELOG.md        # Versioned change log
+└── LICENSE             # MIT
+```
 
-## Recruiter Review Notes
+---
 
-This repository intentionally demonstrates:
+## Recruiter Notes
 
-- Product framing: clear problem definition and user segments
-- Front-end fundamentals: semantic markup, clean styles, accessible forms
-- Feature implementation: data-based interaction and UI state handling
-- Documentation discipline: clear requirements and roadmap direction
+This repository intentionally showcases:
 
-## Near-Term Improvements
+- **Product thinking** — real user segments, clear problem framing, functional information architecture
+- **UI architecture** — fixed app-shell layout, sidebar + tabbed content, responsive breakpoints
+- **Feature implementation** — multi-criteria filtering, sort logic, budget calculator with financial guidance
+- **Data-driven rendering** — listings injected from a typed JS data array, not hardcoded HTML
+- **Accessibility** — ARIA roles, keyboard navigation, reduced-motion support
+- **Engineering discipline** — conventional commits, branch workflow, documented requirements, MIT license
 
-- Add Finnish and English language switch with JSON translation dictionary
-- Add automated front-end tests (Playwright/Cypress for critical flows)
-- Add CI checks (lint + format + smoke test)
-- Connect calculator and pathway flow to a simple API/backend
+---
+
+## Roadmap
+
+- [ ] Finnish / English language switch with JSON translation dictionary
+- [ ] Real listing data via public Finnish open-data API
+- [ ] Saved searches and favourites (localStorage)
+- [ ] Automated end-to-end tests with Playwright
+- [ ] CI pipeline: lint + format check + smoke test
+
+---
 
 ## License
 
-This project is released under the MIT License. See `LICENSE` for details.
+Released under the MIT License. See [`LICENSE`](LICENSE) for details.
