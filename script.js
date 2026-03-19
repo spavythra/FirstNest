@@ -249,11 +249,12 @@ function renderMapAds(listings, selectedId) {
 
 function renderMapSnapshot(listings) {
   const mapCanvas = document.getElementById("mapCanvas");
+  const mapPins = document.getElementById("mapPins");
   const mapInsights = document.getElementById("mapInsights");
-  if (!mapCanvas || !mapInsights) return;
+  if (!mapCanvas || !mapPins || !mapInsights) return;
 
   if (listings.length === 0) {
-    mapCanvas.innerHTML = '<p class="map-watermark">Community map view</p>';
+    mapPins.innerHTML = "";
     mapInsights.innerHTML = `
       <p class="map-kicker">Resident-reported area pulse</p>
       <h3>No area selected</h3>
@@ -273,8 +274,8 @@ function renderMapSnapshot(listings) {
     })
     .join("");
 
-  mapCanvas.innerHTML = `<p class="map-watermark">Community map view</p>${pins}`;
-  mapCanvas.querySelectorAll(".map-pin").forEach((pin) => {
+  mapPins.innerHTML = pins;
+  mapPins.querySelectorAll(".map-pin").forEach((pin) => {
     pin.addEventListener("click", () => {
       selectedListingId = Number(pin.dataset.id);
       renderMapSnapshot(listings);

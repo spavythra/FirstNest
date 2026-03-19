@@ -170,6 +170,14 @@
 
         <section class="map-snapshot" aria-label="Map overview and resident insights">
           <div class="map-canvas" id="mapCanvas">
+            <iframe
+              class="map-embed"
+              title="Tampere map"
+              src="https://www.openstreetmap.org/export/embed.html?bbox=23.6069%2C61.4173%2C24.0663%2C61.5686&amp;layer=mapnik"
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+            ></iframe>
+            <div class="map-pins" id="mapPins" aria-label="Map area pins"></div>
             <p class="map-watermark">Tampere district map</p>
           </div>
           <aside class="map-insights" id="mapInsights" aria-live="polite">
