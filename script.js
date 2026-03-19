@@ -126,6 +126,7 @@ let activeProfile = "all";
 let activeSort = "price-asc";
 let filteredListings = [...LISTINGS];
 let selectedListingId = LISTINGS[0]?.id ?? null;
+let activeBrowseView = "map";
 
 const CITY_COORDS = {
   Helsinki: { x: 54, y: 74 },
@@ -169,6 +170,17 @@ function normalizeCity(city) {
     .replace(/\s+/g, "");
 }
 
+function getPinCoord(listing) {
+  const key = normalizeCity(listing.city);
+  const base = CITY_COORDS[key] || { x: 50, y: 55 };
+  const offsetX = ((listing.id % 4) - 1.5) * 3.2;
+  const offsetY = ((listing.id % 3) - 1) * 2.8;
+  return {
+    x: Math.min(92, Math.max(8, base.x + offsetX)),
+    y: Math.min(88, Math.max(10, base.y + offsetY)),
+  };
+}
+
 function getResidentMetrics(listing) {
   const baseWellness = listing.areaScore * 0.78;
   const bonus =
@@ -188,6 +200,53 @@ function getResidentMetrics(listing) {
   };
 }
 
+function setBrowseView(view) {
+  activeBrowseView = view;
+  const listingsPanel = document.getElementById("tab-listings");
+  const mapBtn = document.getElementById("viewMapBtn");
+  const tilesBtn = document.getElementById("viewTilesBtn");
+
+  if (!listingsPanel) return;
+
+  listingsPanel.classList.toggle("is-map-view", view === "map");
+  listingsPanel.classList.toggle("is-tiles-view", view === "tiles");
+
+  mapBtn?.classList.toggle("is-active", view === "map");
+  tilesBtn?.classList.toggle("is-active", view === "tiles");
+}
+
+function renderMapAds(listings, selectedId) {
+  const mapAdsRow = document.getElementById("mapAdsRow");
+  if (!mapAdsRow) return;
+
+  if (listings.length === 0) {
+    mapAdsRow.innerHTML = "";
+    return;
+  }
+
+  const ranked = [...listings].sort((a, b) => {
+    if (a.id === selectedId) return -1;
+    if (b.id === selectedId) return 1;
+    return a.price - b.price;
+  });
+
+  mapAdsRow.innerHTML = ranked.slice(0, 4).map((listing) => {
+    const activeStyle = listing.id === selectedId ? ' style="border-color: var(--brand);"' : "";
+    return `<article class="map-ad-card" data-id="${listing.id}"${activeStyle}>
+      <h4>${listing.district}, ${listing.city}</h4>
+      <p>${listing.rooms} rooms · ${listing.size} m&sup2;</p>
+      <span class="map-ad-price">${currency.format(listing.price)}</span>
+    </article>`;
+  }).join("");
+
+  mapAdsRow.querySelectorAll(".map-ad-card").forEach((card) => {
+    card.addEventListener("click", () => {
+      selectedListingId = Number(card.dataset.id);
+      renderMapSnapshot(listings);
+    });
+  });
+}
+
 function renderMapSnapshot(listings) {
   const mapCanvas = document.getElementById("mapCanvas");
   const mapInsights = document.getElementById("mapInsights");
@@ -199,27 +258,18 @@ function renderMapSnapshot(listings) {
       <p class="map-kicker">Resident-reported area pulse</p>
       <h3>No area selected</h3>
       <p class="map-copy">Adjust filters to bring back areas and review local resident reports.</p>`;
+    renderMapAds([], null);
     return;
   }
 
   const selected = listings.find((l) => l.id === selectedListingId) || listings[0];
   selectedListingId = selected.id;
 
-  const cityReps = [];
-  const seen = new Set();
-  listings.forEach((listing) => {
-    if (!seen.has(listing.city)) {
-      seen.add(listing.city);
-      cityReps.push(listing);
-    }
-  });
-
-  const pins = cityReps
+  const pins = listings
     .map((listing) => {
-      const key = normalizeCity(listing.city);
-      const coord = CITY_COORDS[key] || { x: 50, y: 55 };
+      const coord = getPinCoord(listing);
       const active = listing.id === selected.id ? " is-active" : "";
-      return `<button class="map-pin${active}" style="left:${coord.x}%;top:${coord.y}%" data-id="${listing.id}" aria-label="${listing.city} resident reports">${listing.city}</button>`;
+      return `<button class="map-pin${active}" style="left:${coord.x}%;top:${coord.y}%" data-id="${listing.id}" aria-label="${listing.district}, ${listing.city} reports">${listing.district}</button>`;
     })
     .join("");
 
@@ -249,6 +299,8 @@ function renderMapSnapshot(listings) {
       </div>
     </div>
     <p class="map-copy">${metrics.reports} resident reports used in this summary.</p>`;
+
+  renderMapAds(listings, selected.id);
 }
 
 /* ── Listing card rendering ─────────────────────────────── */
@@ -418,6 +470,13 @@ if (sortSelect) {
   });
 }
 
+const modeBtns = Array.from(document.querySelectorAll(".mode-btn"));
+modeBtns.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    setBrowseView(btn.dataset.view);
+  });
+});
+
 /* ── Apply Filters button ────────────────────────────────── */
 const applyBtn = document.querySelector(".btn-apply-filters");
 if (applyBtn) {
@@ -491,6 +550,7 @@ if (budgetForm) {
 
 /* ── Init ─────────────────────────────────────────────────── */
 activateTab("listings");
+setBrowseView(activeBrowseView);
 applyFilters();
 updateResults();
 

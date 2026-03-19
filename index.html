@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FirstNest | Find Your First Home in Finland</title>
+  <title>FirstNest Tampere | Map and Ad Search for First Homes</title>
   <meta
     name="description"
-    content="Search, filter and evaluate first homes in Finland. Inclusive platform for immigrants and Finnish citizens."
+    content="Search Tampere homes through map or ad tiles, compare area health and crime trends, and follow a visual first-home buying guide."
   />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -53,21 +53,11 @@
       <p class="sidebar-heading">Search &amp; Filters</p>
 
       <section class="filter-group">
-        <h2 class="filter-title">Location</h2>
-        <label>City / Region
-          <select id="filterCity">
-            <option value="">All Finland</option>
-            <option>Helsinki</option>
-            <option>Espoo</option>
-            <option>Tampere</option>
-            <option>Turku</option>
-            <option>Oulu</option>
-            <option>Jyväskylä</option>
-            <option>Lahti</option>
-          </select>
-        </label>
+        <h2 class="filter-title">Location (Tampere only)</h2>
+        <div class="filter-city-fixed">Tampere market focus</div>
+        <input type="hidden" id="filterCity" value="tampere" />
         <label>District / Neighbourhood
-          <input type="text" id="filterDistrict" placeholder="e.g. Kallio, Hervanta" />
+          <input type="text" id="filterDistrict" placeholder="e.g. Hervanta, Kaleva, Pyynikki" />
         </label>
       </section>
 
@@ -159,9 +149,13 @@
     <main class="content-panel" id="mainPanel">
 
       <!-- TAB PANEL: Browse Homes -->
-      <div class="tab-panel is-active" id="tab-listings" role="tabpanel">
+      <div class="tab-panel is-active is-map-view" id="tab-listings" role="tabpanel">
         <div class="panel-toolbar">
-          <p class="results-count">Showing <strong id="resultsCount">8</strong> properties</p>
+          <p class="results-count">Showing <strong id="resultsCount">8</strong> Tampere homes</p>
+          <div class="browse-mode" role="group" aria-label="Browse mode">
+            <button class="mode-btn is-active" id="viewMapBtn" data-view="map">Map + ads</button>
+            <button class="mode-btn" id="viewTilesBtn" data-view="tiles">Ad tiles</button>
+          </div>
           <div class="sort-row">
             <label>Sort by
               <select id="sortSelect">
@@ -176,14 +170,18 @@
 
         <section class="map-snapshot" aria-label="Map overview and resident insights">
           <div class="map-canvas" id="mapCanvas">
-            <p class="map-watermark">Community map view</p>
+            <p class="map-watermark">Tampere district map</p>
           </div>
           <aside class="map-insights" id="mapInsights" aria-live="polite">
-            <p class="map-kicker">Resident-reported area pulse</p>
-            <h3>Select an area marker</h3>
-            <p class="map-copy">See local wellness and crime trend reports submitted by residents.</p>
+            <p class="map-kicker">Resident-reported district pulse</p>
+            <h3>Select a Tampere district</h3>
+            <p class="map-copy">Compare health and crime signals from verified local resident reports.</p>
           </aside>
         </section>
+
+        <div class="map-ads-row" id="mapAdsRow" aria-label="Ads near selected map area">
+          <!-- compact ads injected by script.js -->
+        </div>
 
         <div class="listings-grid" id="listingsGrid">
           <!-- cards injected by script.js -->
@@ -231,47 +229,62 @@
       <!-- TAB PANEL: Buying Process -->
       <div class="tab-panel" id="tab-process" role="tabpanel">
         <div class="panel-inner process-panel">
-          <h2 class="panel-title">Your 12-Step Buying Process</h2>
-          <p class="panel-sub">A visual, practical path with a Finland-specific buyer checklist.</p>
+          <h2 class="panel-title">Buying Process Visual Blog</h2>
+          <p class="panel-sub">A story-style journey tailored to Tampere's housing realities.</p>
 
-          <section class="process-hero" aria-label="Visual buying journey">
-            <div class="process-illustration" aria-hidden="true">
-              <span class="orb orb-a"></span>
-              <span class="orb orb-b"></span>
-              <span class="orb orb-c"></span>
-              <div class="path-line"></div>
-              <div class="path-stop">Budget</div>
-              <div class="path-stop">Loan Promise</div>
-              <div class="path-stop">Viewing</div>
-              <div class="path-stop">Offer</div>
-              <div class="path-stop">Deed</div>
-            </div>
+          <section class="process-blog" aria-label="Visual process blog">
+            <article class="blog-chapter">
+              <div class="blog-visual visual-budget" aria-hidden="true"></div>
+              <div class="blog-copy">
+                <p class="blog-kicker">Chapter 1</p>
+                <h3>Set your Tampere-ready budget frame</h3>
+                <p>Anchor monthly limits first: loan, hoitovastike, transport, and energy seasonality. Compare Hervanta, Kaleva, and Pyynikki against commute and service quality.</p>
+              </div>
+            </article>
+
+            <article class="blog-chapter reverse">
+              <div class="blog-visual visual-docs" aria-hidden="true"></div>
+              <div class="blog-copy">
+                <p class="blog-kicker">Chapter 2</p>
+                <h3>Read the documents like an insider</h3>
+                <p>Inspect isannoitsijantodistus, renovation horizon, and yhtiolaina exposure. Build a risk snapshot before any offer to avoid hidden monthly burden jumps.</p>
+              </div>
+            </article>
+
+            <article class="blog-chapter">
+              <div class="blog-visual visual-offer" aria-hidden="true"></div>
+              <div class="blog-copy">
+                <p class="blog-kicker">Chapter 3</p>
+                <h3>Offer with evidence, not emotion</h3>
+                <p>Use district-level health and crime trend signals, maintenance forecasts, and financing clauses. Push for full visibility on fees before deed signing.</p>
+              </div>
+            </article>
           </section>
 
           <div class="process-columns">
             <article class="process-card">
-              <h3>Step sequence</h3>
+              <h3>Tampere sequence (quick path)</h3>
               <ol class="step-ladder">
-                <li><span>1</span>Set comfort budget and monthly cost ceiling</li>
-                <li><span>2</span>Get preliminary mortgage promise from at least two lenders</li>
-                <li><span>3</span>Shortlist areas by commute, schools, and service access</li>
-                <li><span>4</span>Attend viewings and inspect housing company records</li>
-                <li><span>5</span>Make offer with condition and financing clauses</li>
-                <li><span>6</span>Sign deed, register ownership, and activate insurance</li>
+                <li><span>1</span>Budget + lender promise</li>
+                <li><span>2</span>Area shortlist by map pulse</li>
+                <li><span>3</span>Viewings + document audit</li>
+                <li><span>4</span>Offer strategy + condition clauses</li>
+                <li><span>5</span>Deed + insurance + utilities</li>
+                <li><span>6</span>90-day post-move budget control</li>
               </ol>
             </article>
 
             <article class="process-card">
               <h3>Buyer checklist (Finland nuances)</h3>
               <ul class="buyer-checklist">
-                <li><input type="checkbox" disabled /><span>Check <strong>housing company debt share</strong> and upcoming renovation schedule (putkiremontti, facade, roof).</span></li>
-                <li><input type="checkbox" disabled /><span>Review <strong>hoitovastike</strong> and whether heating/water is included or metered separately.</span></li>
-                <li><input type="checkbox" disabled /><span>Confirm <strong>energy class (E-luku)</strong> and estimate winter energy costs.</span></li>
-                <li><input type="checkbox" disabled /><span>Verify <strong>land ownership model</strong> (owned plot vs leased municipal/private land).</span></li>
-                <li><input type="checkbox" disabled /><span>Calculate <strong>transfer tax eligibility</strong> and first-home buyer exemptions if applicable.</span></li>
-                <li><input type="checkbox" disabled /><span>Request and read the latest <strong>isannoitsijantodistus</strong> before final offer.</span></li>
-                <li><input type="checkbox" disabled /><span>Review resident-reported <strong>crime and wellness trends</strong> for day and night periods.</span></li>
-                <li><input type="checkbox" disabled /><span>Validate broadband, daycare queue status, and local public transport reliability.</span></li>
+                <li><input type="checkbox" disabled /><span>Check <strong>housing company debt share</strong> and planned putkiremontti impact window.</span></li>
+                <li><input type="checkbox" disabled /><span>Review <strong>hoitovastike</strong>, water billing model, and heating inclusion details.</span></li>
+                <li><input type="checkbox" disabled /><span>Confirm <strong>energy class (E-luku)</strong> and winter electricity risk buffer.</span></li>
+                <li><input type="checkbox" disabled /><span>Verify <strong>owned vs leased land</strong> and lease escalation clauses.</span></li>
+                <li><input type="checkbox" disabled /><span>Validate <strong>transfer tax rules</strong> and first-home buyer eligibility status.</span></li>
+                <li><input type="checkbox" disabled /><span>Read latest <strong>isannoitsijantodistus</strong> before final negotiation.</span></li>
+                <li><input type="checkbox" disabled /><span>Compare district <strong>health score and crime trend</strong> with resident report count.</span></li>
+                <li><input type="checkbox" disabled /><span>Confirm daycare queues, tram/bus coverage, and remote-work broadband reliability.</span></li>
               </ul>
             </article>
           </div>
