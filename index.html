@@ -174,6 +174,17 @@
           </div>
         </div>
 
+        <section class="map-snapshot" aria-label="Map overview and resident insights">
+          <div class="map-canvas" id="mapCanvas">
+            <p class="map-watermark">Community map view</p>
+          </div>
+          <aside class="map-insights" id="mapInsights" aria-live="polite">
+            <p class="map-kicker">Resident-reported area pulse</p>
+            <h3>Select an area marker</h3>
+            <p class="map-copy">See local wellness and crime trend reports submitted by residents.</p>
+          </aside>
+        </section>
+
         <div class="listings-grid" id="listingsGrid">
           <!-- cards injected by script.js -->
         </div>
@@ -219,23 +230,51 @@
 
       <!-- TAB PANEL: Buying Process -->
       <div class="tab-panel" id="tab-process" role="tabpanel">
-        <div class="panel-inner">
+        <div class="panel-inner process-panel">
           <h2 class="panel-title">Your 12-Step Buying Process</h2>
-          <p class="panel-sub">A clear end-to-end path from planning to moving in.</p>
-          <ol class="timeline-list">
-            <li><span>1</span>Set your realistic budget and comfort range</li>
-            <li><span>2</span>Review debt, cash flow, and credit profile</li>
-            <li><span>3</span>Prepare identity and financing documents</li>
-            <li><span>4</span>Collect preliminary lender conversations</li>
-            <li><span>5</span>Check first-buyer grants and state guarantees</li>
-            <li><span>6</span>Select neighbourhoods by daily-life priorities</li>
-            <li><span>7</span>Attend viewings and compare maintenance burden</li>
-            <li><span>8</span>Run legal, technical, and condition checks</li>
-            <li><span>9</span>Negotiate terms with full fee visibility</li>
-            <li><span>10</span>Confirm mortgage and insurance structure</li>
-            <li><span>11</span>Sign deed and complete the transfer process</li>
-            <li><span>12</span>Activate post-move budget and emergency fund</li>
-          </ol>
+          <p class="panel-sub">A visual, practical path with a Finland-specific buyer checklist.</p>
+
+          <section class="process-hero" aria-label="Visual buying journey">
+            <div class="process-illustration" aria-hidden="true">
+              <span class="orb orb-a"></span>
+              <span class="orb orb-b"></span>
+              <span class="orb orb-c"></span>
+              <div class="path-line"></div>
+              <div class="path-stop">Budget</div>
+              <div class="path-stop">Loan Promise</div>
+              <div class="path-stop">Viewing</div>
+              <div class="path-stop">Offer</div>
+              <div class="path-stop">Deed</div>
+            </div>
+          </section>
+
+          <div class="process-columns">
+            <article class="process-card">
+              <h3>Step sequence</h3>
+              <ol class="step-ladder">
+                <li><span>1</span>Set comfort budget and monthly cost ceiling</li>
+                <li><span>2</span>Get preliminary mortgage promise from at least two lenders</li>
+                <li><span>3</span>Shortlist areas by commute, schools, and service access</li>
+                <li><span>4</span>Attend viewings and inspect housing company records</li>
+                <li><span>5</span>Make offer with condition and financing clauses</li>
+                <li><span>6</span>Sign deed, register ownership, and activate insurance</li>
+              </ol>
+            </article>
+
+            <article class="process-card">
+              <h3>Buyer checklist (Finland nuances)</h3>
+              <ul class="buyer-checklist">
+                <li><input type="checkbox" disabled /><span>Check <strong>housing company debt share</strong> and upcoming renovation schedule (putkiremontti, facade, roof).</span></li>
+                <li><input type="checkbox" disabled /><span>Review <strong>hoitovastike</strong> and whether heating/water is included or metered separately.</span></li>
+                <li><input type="checkbox" disabled /><span>Confirm <strong>energy class (E-luku)</strong> and estimate winter energy costs.</span></li>
+                <li><input type="checkbox" disabled /><span>Verify <strong>land ownership model</strong> (owned plot vs leased municipal/private land).</span></li>
+                <li><input type="checkbox" disabled /><span>Calculate <strong>transfer tax eligibility</strong> and first-home buyer exemptions if applicable.</span></li>
+                <li><input type="checkbox" disabled /><span>Request and read the latest <strong>isannoitsijantodistus</strong> before final offer.</span></li>
+                <li><input type="checkbox" disabled /><span>Review resident-reported <strong>crime and wellness trends</strong> for day and night periods.</span></li>
+                <li><input type="checkbox" disabled /><span>Validate broadband, daycare queue status, and local public transport reliability.</span></li>
+              </ul>
+            </article>
+          </div>
         </div>
       </div>
 

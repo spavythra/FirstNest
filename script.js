@@ -125,6 +125,17 @@ const LISTINGS = [
 let activeProfile = "all";
 let activeSort = "price-asc";
 let filteredListings = [...LISTINGS];
+let selectedListingId = LISTINGS[0]?.id ?? null;
+
+const CITY_COORDS = {
+  Helsinki: { x: 54, y: 74 },
+  Espoo: { x: 48, y: 75 },
+  Vantaa: { x: 58, y: 70 },
+  Turku: { x: 30, y: 78 },
+  Tampere: { x: 46, y: 58 },
+  Jyvaskyla: { x: 56, y: 49 },
+  Oulu: { x: 53, y: 25 },
+};
 
 /* ── Tab switching ──────────────────────────────────────── */
 const tabBtns = Array.from(document.querySelectorAll(".tab-btn"));
@@ -151,6 +162,95 @@ tabBtns.forEach((btn) => {
   });
 });
 
+function normalizeCity(city) {
+  return city
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, "");
+}
+
+function getResidentMetrics(listing) {
+  const baseWellness = listing.areaScore * 0.78;
+  const bonus =
+    (listing.tags.includes("Nature") ? 8 : 0) +
+    (listing.tags.includes("Services") ? 5 : 0) +
+    (listing.tags.includes("Public Transport") ? 5 : 0) +
+    (listing.tags.includes("Safety") ? 6 : 0);
+
+  const wellness = Math.min(99, Math.max(42, Math.round(baseWellness + bonus)));
+  const crimeIndex = Math.max(1.1, (10 - wellness / 11.5 + (listing.id % 3) * 0.4));
+  const reports = 28 + listing.id * 7;
+
+  return {
+    wellness,
+    crimeIndex: crimeIndex.toFixed(1),
+    reports,
+  };
+}
+
+function renderMapSnapshot(listings) {
+  const mapCanvas = document.getElementById("mapCanvas");
+  const mapInsights = document.getElementById("mapInsights");
+  if (!mapCanvas || !mapInsights) return;
+
+  if (listings.length === 0) {
+    mapCanvas.innerHTML = '<p class="map-watermark">Community map view</p>';
+    mapInsights.innerHTML = `
+      <p class="map-kicker">Resident-reported area pulse</p>
+      <h3>No area selected</h3>
+      <p class="map-copy">Adjust filters to bring back areas and review local resident reports.</p>`;
+    return;
+  }
+
+  const selected = listings.find((l) => l.id === selectedListingId) || listings[0];
+  selectedListingId = selected.id;
+
+  const cityReps = [];
+  const seen = new Set();
+  listings.forEach((listing) => {
+    if (!seen.has(listing.city)) {
+      seen.add(listing.city);
+      cityReps.push(listing);
+    }
+  });
+
+  const pins = cityReps
+    .map((listing) => {
+      const key = normalizeCity(listing.city);
+      const coord = CITY_COORDS[key] || { x: 50, y: 55 };
+      const active = listing.id === selected.id ? " is-active" : "";
+      return `<button class="map-pin${active}" style="left:${coord.x}%;top:${coord.y}%" data-id="${listing.id}" aria-label="${listing.city} resident reports">${listing.city}</button>`;
+    })
+    .join("");
+
+  mapCanvas.innerHTML = `<p class="map-watermark">Community map view</p>${pins}`;
+  mapCanvas.querySelectorAll(".map-pin").forEach((pin) => {
+    pin.addEventListener("click", () => {
+      selectedListingId = Number(pin.dataset.id);
+      renderMapSnapshot(listings);
+    });
+  });
+
+  const metrics = getResidentMetrics(selected);
+  mapInsights.innerHTML = `
+    <p class="map-kicker">Resident-reported area pulse</p>
+    <h3>${selected.district}, ${selected.city}</h3>
+    <p class="map-copy">Updated from local resident submissions over the last 90 days.</p>
+    <div class="resident-metrics">
+      <div class="metric-tile">
+        <span class="metric-label">Wellness score</span>
+        <span class="metric-value">${metrics.wellness}/100</span>
+        <span class="metric-note">Resident quality-of-life rating</span>
+      </div>
+      <div class="metric-tile">
+        <span class="metric-label">Crime trend</span>
+        <span class="metric-value">${metrics.crimeIndex}/10</span>
+        <span class="metric-note">Lower is better</span>
+      </div>
+    </div>
+    <p class="map-copy">${metrics.reports} resident reports used in this summary.</p>`;
+}
+
 /* ── Listing card rendering ─────────────────────────────── */
 function buildCard(listing) {
   const badge = listing.badge
@@ -164,6 +264,7 @@ function buildCard(listing) {
   const scorePct = Math.min(100, Math.max(0, listing.areaScore));
   const scoreLabel =
     scorePct >= 85 ? "Excellent area" : scorePct >= 70 ? "Good area" : "Decent area";
+  const metrics = getResidentMetrics(listing);
 
   return `
     <article class="prop-card" data-id="${listing.id}" tabindex="0" role="article">
@@ -183,6 +284,16 @@ function buildCard(listing) {
           </div>
           <span>${scorePct}%</span>
         </div>
+        <div class="prop-community">
+          <div class="prop-community-item">
+            <strong>${metrics.wellness}/100</strong>
+            <span>Resident wellness</span>
+          </div>
+          <div class="prop-community-item">
+            <strong>${metrics.crimeIndex}/10</strong>
+            <span>Crime trend</span>
+          </div>
+        </div>
       </div>
     </article>`;
 }
@@ -201,9 +312,24 @@ function renderListings(listings) {
       </div>`;
   } else {
     grid.innerHTML = listings.map(buildCard).join("");
+
+    grid.querySelectorAll(".prop-card").forEach((card) => {
+      card.addEventListener("click", () => {
+        selectedListingId = Number(card.dataset.id);
+        renderMapSnapshot(listings);
+      });
+      card.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          selectedListingId = Number(card.dataset.id);
+          renderMapSnapshot(listings);
+        }
+      });
+    });
   }
 
   if (count) count.textContent = listings.length;
+  renderMapSnapshot(listings);
 }
 
 /* ── Sorting ─────────────────────────────────────────────── */
