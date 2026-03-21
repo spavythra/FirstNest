@@ -9,8 +9,8 @@ const currency = new Intl.NumberFormat("fi-FI", {
 let currentUser = null;
 const userFavourites = new Set(); // listing id strings
 
-/* ── Live listings (starts as mock, replaced by DB data) ──── */
-let LIVE_LISTINGS = [...LISTINGS];
+/* ── Live listings (populated by initData on startup) ──── */
+let LIVE_LISTINGS = [];
 
 /* ── Time helpers ────────────────────────────────────────── */
 function timeAgo(isoString) {
