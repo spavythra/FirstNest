@@ -127,16 +127,43 @@ let activeSort = "price-asc";
 let filteredListings = [...LISTINGS];
 let selectedListingId = LISTINGS[0]?.id ?? null;
 let activeBrowseView = "map";
+const activePoiTypes = new Set(["hospital", "school", "prisma", "shop"]);
 
-const CITY_COORDS = {
-  Helsinki: { x: 54, y: 74 },
-  Espoo: { x: 48, y: 75 },
-  Vantaa: { x: 58, y: 70 },
-  Turku: { x: 30, y: 78 },
-  Tampere: { x: 46, y: 58 },
-  Jyvaskyla: { x: 56, y: 49 },
-  Oulu: { x: 53, y: 25 },
+const LISTING_COORDS = {
+  1: [60.1699, 24.9384],
+  2: [61.4982, 23.7609],
+  3: [60.1617, 24.7385],
+  4: [60.4879, 22.2775],
+  5: [62.2426, 25.7473],
+  6: [65.0121, 25.4651],
+  7: [60.2934, 25.0378],
+  8: [61.5042, 23.7003],
 };
+
+const CITY_LATLNG = {
+  helsinki: [60.1699, 24.9384],
+  tampere: [61.4981, 23.7608],
+  espoo: [60.2055, 24.6559],
+  turku: [60.4518, 22.2666],
+  jyvaskyla: [62.2426, 25.7473],
+  oulu: [65.0121, 25.4651],
+  vantaa: [60.2934, 25.0378],
+};
+
+const POI_POINTS = [
+  { name: "TAYS", type: "hospital", icon: "+", latlng: [61.5033, 23.8118] },
+  { name: "Hatanpaan sairaala", type: "hospital", icon: "+", latlng: [61.4826, 23.7685] },
+  { name: "Tampereen Lyseon lukio", type: "school", icon: "S", latlng: [61.4994, 23.7689] },
+  { name: "Hervannan koulu", type: "school", icon: "S", latlng: [61.4486, 23.8541] },
+  { name: "Prisma Kaleva", type: "prisma", icon: "P", latlng: [61.5004, 23.7943] },
+  { name: "Prisma Linnainmaa", type: "prisma", icon: "P", latlng: [61.5126, 23.8887] },
+  { name: "Ratina", type: "shop", icon: "M", latlng: [61.4938, 23.7748] },
+  { name: "Koskikeskus", type: "shop", icon: "M", latlng: [61.4976, 23.7719] },
+];
+
+let realMap;
+let listingLayer;
+const poiLayers = {};
 
 /* ── Tab switching ──────────────────────────────────────── */
 const tabBtns = Array.from(document.querySelectorAll(".tab-btn"));
@@ -163,22 +190,36 @@ tabBtns.forEach((btn) => {
   });
 });
 
-function normalizeCity(city) {
-  return city
+function getListingLatLng(listing) {
+  if (LISTING_COORDS[listing.id]) {
+    return LISTING_COORDS[listing.id];
+  }
+  const key = listing.city
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
-    .replace(/\s+/g, "");
+    .toLowerCase();
+  return CITY_LATLNG[key] || [61.4981, 23.7608];
 }
 
-function getPinCoord(listing) {
-  const key = normalizeCity(listing.city);
-  const base = CITY_COORDS[key] || { x: 50, y: 55 };
-  const offsetX = ((listing.id % 4) - 1.5) * 3.2;
-  const offsetY = ((listing.id % 3) - 1) * 2.8;
-  return {
-    x: Math.min(92, Math.max(8, base.x + offsetX)),
-    y: Math.min(88, Math.max(10, base.y + offsetY)),
-  };
+function ensureMap() {
+  if (realMap || typeof L === "undefined") {
+    return;
+  }
+
+  realMap = L.map("mapSurface", {
+    zoomControl: true,
+    attributionControl: true,
+  }).setView([61.4981, 23.7608], 12);
+
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+  }).addTo(realMap);
+
+  listingLayer = L.layerGroup().addTo(realMap);
+  ["hospital", "school", "prisma", "shop"].forEach((type) => {
+    poiLayers[type] = L.layerGroup().addTo(realMap);
+  });
 }
 
 function getResidentMetrics(listing) {
@@ -247,18 +288,91 @@ function renderMapAds(listings, selectedId) {
   });
 }
 
+function getPoiFiltersMarkup() {
+  const checked = (key) => (activePoiTypes.has(key) ? "checked" : "");
+  return `
+    <section class="poi-filters" aria-label="Map highlights">
+      <p class="poi-title">Map highlights</p>
+      <div class="poi-row">
+        <label class="poi-toggle"><input type="checkbox" data-poi="hospital" ${checked("hospital")} /> Hospitals</label>
+        <label class="poi-toggle"><input type="checkbox" data-poi="school" ${checked("school")} /> Schools</label>
+        <label class="poi-toggle"><input type="checkbox" data-poi="prisma" ${checked("prisma")} /> Prisma</label>
+        <label class="poi-toggle"><input type="checkbox" data-poi="shop" ${checked("shop")} /> Big shops</label>
+      </div>
+    </section>`;
+}
+
+function renderPoiMarkers() {
+  ensureMap();
+  if (!realMap || typeof L === "undefined") return;
+
+  Object.keys(poiLayers).forEach((type) => {
+    poiLayers[type]?.clearLayers();
+  });
+
+  POI_POINTS.forEach((poi) => {
+    const icon = L.divIcon({
+      className: "",
+      html: `<span class="poi-logo-marker"><span class="poi-logo-icon ${poi.type}">${poi.icon}</span>${poi.name}</span>`,
+      iconSize: [120, 20],
+      iconAnchor: [20, 10],
+    });
+
+    const marker = L.marker(poi.latlng, { icon }).bindTooltip(poi.name, { direction: "top" });
+    poiLayers[poi.type]?.addLayer(marker);
+  });
+
+  Object.keys(poiLayers).forEach((type) => {
+    const layer = poiLayers[type];
+    if (!layer) return;
+    if (activePoiTypes.has(type)) {
+      if (!realMap.hasLayer(layer)) realMap.addLayer(layer);
+    } else if (realMap.hasLayer(layer)) {
+      realMap.removeLayer(layer);
+    }
+  });
+}
+
+function bindPoiFilterHandlers(listings) {
+  const toggles = Array.from(document.querySelectorAll(".poi-toggle input[data-poi]"));
+  toggles.forEach((toggle) => {
+    toggle.addEventListener("change", () => {
+      const key = toggle.dataset.poi;
+      if (!key) return;
+      if (toggle.checked) {
+        activePoiTypes.add(key);
+      } else {
+        activePoiTypes.delete(key);
+      }
+      renderPoiMarkers();
+      renderMapAds(listings, selectedListingId);
+    });
+  });
+}
+
 function renderMapSnapshot(listings) {
+  ensureMap();
   const mapCanvas = document.getElementById("mapCanvas");
-  const mapPins = document.getElementById("mapPins");
   const mapInsights = document.getElementById("mapInsights");
-  if (!mapCanvas || !mapPins || !mapInsights) return;
+  if (!mapCanvas || !mapInsights) return;
+  if (!realMap || !listingLayer || typeof L === "undefined") {
+    mapInsights.innerHTML = `
+      <p class="map-kicker">Map unavailable</p>
+      <h3>Could not load interactive map</h3>
+      <p class="map-copy">Check internet connection or browser content blocking settings.</p>`;
+    return;
+  }
+
+  listingLayer.clearLayers();
 
   if (listings.length === 0) {
-    mapPins.innerHTML = "";
+    renderPoiMarkers();
     mapInsights.innerHTML = `
       <p class="map-kicker">Resident-reported area pulse</p>
       <h3>No area selected</h3>
-      <p class="map-copy">Adjust filters to bring back areas and review local resident reports.</p>`;
+      <p class="map-copy">Adjust filters to bring back areas and review local resident reports.</p>
+      ${getPoiFiltersMarkup()}`;
+    bindPoiFilterHandlers(listings);
     renderMapAds([], null);
     return;
   }
@@ -266,21 +380,33 @@ function renderMapSnapshot(listings) {
   const selected = listings.find((l) => l.id === selectedListingId) || listings[0];
   selectedListingId = selected.id;
 
-  const pins = listings
-    .map((listing) => {
-      const coord = getPinCoord(listing);
-      const active = listing.id === selected.id ? " is-active" : "";
-      return `<button class="map-pin${active}" style="left:${coord.x}%;top:${coord.y}%" data-id="${listing.id}" aria-label="${listing.district}, ${listing.city} reports">${listing.district}</button>`;
-    })
-    .join("");
-
-  mapPins.innerHTML = pins;
-  mapPins.querySelectorAll(".map-pin").forEach((pin) => {
-    pin.addEventListener("click", () => {
-      selectedListingId = Number(pin.dataset.id);
-      renderMapSnapshot(listings);
+  const markerBounds = [];
+  listings.forEach((listing) => {
+    const latlng = getListingLatLng(listing);
+    markerBounds.push(latlng);
+    const isActive = listing.id === selected.id;
+    const icon = L.divIcon({
+      className: "",
+      html: `<span class="listing-logo-marker${isActive ? " is-active" : ""}">${listing.district}</span>`,
+      iconSize: [90, 22],
+      iconAnchor: [18, 11],
     });
+
+    const marker = L.marker(latlng, { icon })
+      .bindTooltip(`${listing.title} - ${currency.format(listing.price)}`, { direction: "top" })
+      .on("click", () => {
+        selectedListingId = listing.id;
+        renderMapSnapshot(listings);
+      });
+
+    listingLayer.addLayer(marker);
   });
+
+  if (markerBounds.length > 1) {
+    realMap.fitBounds(markerBounds, { padding: [35, 35], maxZoom: 13 });
+  } else if (markerBounds.length === 1) {
+    realMap.setView(markerBounds[0], 13);
+  }
 
   const metrics = getResidentMetrics(selected);
   mapInsights.innerHTML = `
@@ -299,8 +425,11 @@ function renderMapSnapshot(listings) {
         <span class="metric-note">Lower is better</span>
       </div>
     </div>
-    <p class="map-copy">${metrics.reports} resident reports used in this summary.</p>`;
+    <p class="map-copy">${metrics.reports} resident reports used in this summary.</p>
+    ${getPoiFiltersMarkup()}`;
 
+  renderPoiMarkers();
+  bindPoiFilterHandlers(listings);
   renderMapAds(listings, selected.id);
 }
 
