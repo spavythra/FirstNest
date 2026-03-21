@@ -643,6 +643,9 @@ const modeBtns = Array.from(document.querySelectorAll(".mode-btn"));
 modeBtns.forEach((btn) => {
   btn.addEventListener("click", () => {
     setBrowseView(btn.dataset.view);
+    if (btn.dataset.view === "map" && realMap) {
+      setTimeout(() => realMap.invalidateSize(), 50);
+    }
   });
 });
 
@@ -717,12 +720,6 @@ if (budgetForm) {
   });
 }
 
-/* ── Init ─────────────────────────────────────────────────── */
-activateTab("listings");
-setBrowseView(activeBrowseView);
-initData();
-updateResults();
-
 /* ── Data loading ───────────────────────────────────────── */
 function dbRowToListing(row) {
   return {
@@ -752,16 +749,19 @@ async function initData() {
       .order("created_at", { ascending: false });
     if (!error && data && data.length > 0) {
       LIVE_LISTINGS = data.map(dbRowToListing);
-      filteredListings = [...LIVE_LISTINGS];
-      renderListings(sortListings(filteredListings, activeSort));
+      applyFilters();
       return;
     }
   }
-  // no DB connection — use local mock data
   LIVE_LISTINGS = LISTINGS;
-  filteredListings = [...LIVE_LISTINGS];
-  renderListings(sortListings(filteredListings, activeSort));
+  applyFilters();
 }
+
+/* ── Init ─────────────────────────────────────────────────── */
+activateTab("listings");
+setBrowseView(activeBrowseView);
+initData();
+updateResults();
 
 /* ── Auth UI helpers ─────────────────────────────────────── */
 function updateAuthUI(user) {
