@@ -10,7 +10,7 @@ let currentUser = null;
 const userFavourites = new Set(); // listing id strings
 
 /* ── Live listings (starts as mock, replaced by DB data) ──── */
-let LIVE_LISTINGS = null; // populated in initData()
+let LIVE_LISTINGS = [...LISTINGS];
 
 /* ── Time helpers ────────────────────────────────────────── */
 function timeAgo(isoString) {
