@@ -5,6 +5,31 @@ const currency = new Intl.NumberFormat("fi-FI", {
   maximumFractionDigits: 0,
 });
 
+/* ── Auth + favourites state ─────────────────────────────── */
+let currentUser = null;
+const userFavourites = new Set(); // listing id strings
+
+/* ── Live listings (starts as mock, replaced by DB data) ──── */
+let LIVE_LISTINGS = null; // populated in initData()
+
+/* ── Time helpers ────────────────────────────────────────── */
+function timeAgo(isoString) {
+  if (!isoString) return "";
+  const diffMs = Date.now() - new Date(isoString).getTime();
+  const mins  = Math.floor(diffMs / 60000);
+  const hours = Math.floor(diffMs / 3600000);
+  const days  = Math.floor(diffMs / 86400000);
+  if (mins  < 60)  return `${mins}m ago`;
+  if (hours < 24)  return `${hours}h ago`;
+  if (days  <  7)  return `${days}d ago`;
+  return new Date(isoString).toLocaleDateString("fi-FI");
+}
+
+function withinDays(isoString, days) {
+  if (!isoString) return true; // mock data has no timestamps — always show
+  return Date.now() - new Date(isoString).getTime() <= days * 86400000;
+}
+
 /* ── Mock listing data ────────────────────────────────────── */
 const LISTINGS = [
   {
@@ -448,10 +473,15 @@ function buildCard(listing) {
     scorePct >= 85 ? "Excellent area" : scorePct >= 70 ? "Good area" : "Decent area";
   const metrics = getResidentMetrics(listing);
 
+  const isFav = userFavourites.has(String(listing.id));
+  const timeLabel = listing.created_at ? `<span class="prop-time">${timeAgo(listing.created_at)}</span>` : "";
+
   return `
     <article class="prop-card" data-id="${listing.id}" tabindex="0" role="article">
       <div class="prop-card-img" aria-label="Property photo placeholder">
         ${badge}
+        ${timeLabel}
+        <button class="fav-btn${isFav ? " is-fav" : ""}" data-fav-id="${listing.id}" aria-label="${isFav ? "Remove from" : "Save to"} favourites" title="Save">&#9825;</button>
         Photo
       </div>
       <div class="prop-card-body">
@@ -508,6 +538,13 @@ function renderListings(listings) {
         }
       });
     });
+
+    grid.querySelectorAll(".fav-btn").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        toggleFavourite(String(btn.dataset.favId), btn);
+      });
+    });
   }
 
   if (count) count.textContent = listings.length;
@@ -554,7 +591,7 @@ function applyFilters() {
     .filter((a) => document.getElementById(a.id)?.checked)
     .map((a) => a.tag);
 
-  filteredListings = LISTINGS.filter((l) => {
+  filteredListings = LIVE_LISTINGS.filter((l) => {
     if (cityVal && !l.city.toLowerCase().includes(cityVal)) return false;
     if (districtVal && !l.district.toLowerCase().includes(districtVal)) return false;
     if (typeVal && l.type !== typeVal) return false;
@@ -564,6 +601,8 @@ function applyFilters() {
     if (roomsVal && roomsVal !== "4+" && l.rooms !== Number(roomsVal)) return false;
     if (activeProfile !== "all" && !l.profile.includes(activeProfile)) return false;
     if (requiredTags.length > 0 && !requiredTags.every((t) => l.tags.includes(t))) return false;
+    const ageDays = Number(document.getElementById("filterAge")?.value) || 0;
+    if (ageDays > 0 && !withinDays(l.created_at, ageDays)) return false;
     return true;
   });
 
@@ -681,6 +720,285 @@ if (budgetForm) {
 /* ── Init ─────────────────────────────────────────────────── */
 activateTab("listings");
 setBrowseView(activeBrowseView);
-applyFilters();
+initData();
 updateResults();
 
+/* ── Data loading ───────────────────────────────────────── */
+function dbRowToListing(row) {
+  return {
+    id:         row.id,
+    title:      row.title,
+    city:       row.city,
+    district:   row.district,
+    price:      row.price,
+    size:       row.size,
+    rooms:      row.rooms,
+    type:       row.type,
+    badge:      row.badge || null,
+    tags:       row.tags || [],
+    areaScore:  row.area_score,
+    profile:    row.profile || ["all"],
+    created_at: row.created_at,
+    lat:        row.lat,
+    lng:        row.lng,
+  };
+}
+
+async function initData() {
+  if (supabase) {
+    const { data, error } = await supabase
+      .from("listings")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (!error && data && data.length > 0) {
+      LIVE_LISTINGS = data.map(dbRowToListing);
+      filteredListings = [...LIVE_LISTINGS];
+      renderListings(sortListings(filteredListings, activeSort));
+      return;
+    }
+  }
+  // no DB connection — use local mock data
+  LIVE_LISTINGS = LISTINGS;
+  filteredListings = [...LIVE_LISTINGS];
+  renderListings(sortListings(filteredListings, activeSort));
+}
+
+/* ── Auth UI helpers ─────────────────────────────────────── */
+function updateAuthUI(user) {
+  const signInBtn  = document.getElementById("signInBtn");
+  const userChip   = document.getElementById("userChip");
+  const postAdBtn  = document.getElementById("postAdBtn");
+  const avatarImg  = document.getElementById("userAvatarImg");
+  const nameEl     = document.getElementById("userDisplayName");
+
+  if (user) {
+    signInBtn?.setAttribute("hidden", "");
+    userChip?.removeAttribute("hidden");
+    postAdBtn?.removeAttribute("hidden");
+    if (avatarImg && user.user_metadata?.avatar_url) {
+      avatarImg.src = user.user_metadata.avatar_url;
+      avatarImg.removeAttribute("hidden");
+    }
+    if (nameEl) {
+      nameEl.textContent = user.user_metadata?.full_name ||
+                           user.email?.split("@")[0] || "User";
+    }
+  } else {
+    signInBtn?.removeAttribute("hidden");
+    userChip?.setAttribute("hidden", "");
+    postAdBtn?.setAttribute("hidden", "");
+  }
+}
+
+/* ── Auth actions ────────────────────────────────────────── */
+function openAuthModal() {
+  document.getElementById("authModal")?.showModal();
+}
+function closeAuthModal() {
+  document.getElementById("authModal")?.close();
+  document.getElementById("authError")?.setAttribute("hidden", "");
+}
+
+async function signInWithGoogle() {
+  if (!supabase) { alert("Backend not configured yet. See supabase.js."); return; }
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: { redirectTo: window.location.origin },
+  });
+  if (error) showAuthError(error.message);
+}
+
+async function signInWithEmail(email, password) {
+  if (!supabase) { alert("Backend not configured yet. See supabase.js."); return; }
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) { showAuthError(error.message); return; }
+  closeAuthModal();
+}
+
+async function signUpWithEmail(email, password) {
+  if (!supabase) { alert("Backend not configured yet. See supabase.js."); return; }
+  const { error } = await supabase.auth.signUp({ email, password });
+  if (error) { showAuthError(error.message); return; }
+  showAuthError("Check your email to confirm your account.", "info");
+}
+
+async function doSignOut() {
+  if (!supabase) return;
+  await supabase.auth.signOut();
+  currentUser = null;
+  userFavourites.clear();
+  updateAuthUI(null);
+  renderListings(sortListings(filteredListings, activeSort));
+}
+
+function showAuthError(msg, type = "error") {
+  const el = document.getElementById("authError");
+  if (!el) return;
+  el.textContent = msg;
+  el.className = `modal-error${type === "info" ? " is-info" : ""}`;
+  el.removeAttribute("hidden");
+}
+
+/* ── Favourites ──────────────────────────────────────────── */
+async function loadFavourites() {
+  if (!supabase || !currentUser) return;
+  const { data } = await supabase
+    .from("favourites")
+    .select("listing_id")
+    .eq("user_id", currentUser.id);
+  userFavourites.clear();
+  (data || []).forEach((row) => userFavourites.add(String(row.listing_id)));
+}
+
+async function toggleFavourite(listingId, btnEl) {
+  if (!currentUser) { openAuthModal(); return; }
+  const isFav = userFavourites.has(listingId);
+
+  if (isFav) {
+    userFavourites.delete(listingId);
+    if (supabase) {
+      await supabase.from("favourites").delete()
+        .eq("user_id", currentUser.id)
+        .eq("listing_id", listingId);
+    }
+  } else {
+    userFavourites.add(listingId);
+    if (supabase) {
+      await supabase.from("favourites").insert({
+        user_id:    currentUser.id,
+        listing_id: Number(listingId),
+      });
+    }
+  }
+
+  if (btnEl) {
+    btnEl.classList.toggle("is-fav", !isFav);
+    btnEl.setAttribute("aria-label", (!isFav ? "Remove from" : "Save to") + " favourites");
+  }
+}
+
+/* ── Post Ad ─────────────────────────────────────────────── */
+function openPostAdModal() {
+  document.getElementById("postAdModal")?.showModal();
+  document.getElementById("postAdError")?.setAttribute("hidden", "");
+}
+function closePostAdModal() {
+  document.getElementById("postAdModal")?.close();
+  document.getElementById("postAdForm")?.reset();
+}
+
+async function submitPostAd(e) {
+  e.preventDefault();
+  if (!currentUser) { closePostAdModal(); openAuthModal(); return; }
+
+  const title    = document.getElementById("adTitle")?.value.trim();
+  const district = document.getElementById("adDistrict")?.value.trim();
+  const type     = document.getElementById("adType")?.value;
+  const rooms    = Number(document.getElementById("adRooms")?.value);
+  const price    = Number(document.getElementById("adPrice")?.value);
+  const size     = Number(document.getElementById("adSize")?.value);
+  const desc     = document.getElementById("adDescription")?.value.trim();
+
+  if (!title || !district || !price || !size || rooms < 1) {
+    showPostAdError("Please fill in all required fields.");
+    return;
+  }
+
+  const submitBtn = document.getElementById("postAdSubmit");
+  if (submitBtn) submitBtn.disabled = true;
+
+  const newListing = {
+    user_id:     currentUser.id,
+    title,
+    city:        "Tampere",
+    district,
+    price,
+    size,
+    rooms,
+    type,
+    description: desc || null,
+    badge:       null,
+    tags:        [],
+    area_score:  70,
+    profile:     ["all"],
+  };
+
+  if (supabase) {
+    const { data, error } = await supabase
+      .from("listings")
+      .insert(newListing)
+      .select()
+      .single();
+
+    if (submitBtn) submitBtn.disabled = false;
+    if (error) { showPostAdError(error.message); return; }
+    LIVE_LISTINGS = [dbRowToListing(data), ...LIVE_LISTINGS];
+  } else {
+    const fakeRow = {
+      ...newListing,
+      id:         Date.now(),
+      created_at: new Date().toISOString(),
+      area_score: 70,
+      areaScore:  70,
+    };
+    LIVE_LISTINGS = [fakeRow, ...LIVE_LISTINGS];
+    if (submitBtn) submitBtn.disabled = false;
+  }
+
+  filteredListings = [...LIVE_LISTINGS];
+  renderListings(sortListings(filteredListings, activeSort));
+  closePostAdModal();
+}
+
+function showPostAdError(msg) {
+  const el = document.getElementById("postAdError");
+  if (!el) return;
+  el.textContent = msg;
+  el.removeAttribute("hidden");
+}
+
+/* ── Wire up modals & buttons ────────────────────────────── */
+document.getElementById("signInBtn")       ?.addEventListener("click", openAuthModal);
+document.getElementById("authModalClose")  ?.addEventListener("click", closeAuthModal);
+document.getElementById("authModal")       ?.addEventListener("click", (e) => { if (e.target === e.currentTarget) closeAuthModal(); });
+document.getElementById("signInGoogle")    ?.addEventListener("click", signInWithGoogle);
+document.getElementById("signOutBtn")      ?.addEventListener("click", doSignOut);
+document.getElementById("postAdBtn")       ?.addEventListener("click", openPostAdModal);
+document.getElementById("postAdModalClose")?.addEventListener("click", closePostAdModal);
+document.getElementById("postAdCancel")    ?.addEventListener("click", closePostAdModal);
+document.getElementById("postAdModal")     ?.addEventListener("click", (e) => { if (e.target === e.currentTarget) closePostAdModal(); });
+document.getElementById("postAdForm")      ?.addEventListener("submit", submitPostAd);
+
+document.getElementById("showSignUp")?.addEventListener("click", () => {
+  const emailInput = document.getElementById("authEmail");
+  const passInput  = document.getElementById("authPassword");
+  const email = emailInput?.value.trim();
+  const pass  = passInput?.value;
+  signUpWithEmail(email, pass);
+});
+
+document.getElementById("authEmailForm")?.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const email = document.getElementById("authEmail")?.value.trim();
+  const pass  = document.getElementById("authPassword")?.value;
+  signInWithEmail(email, pass);
+});
+
+/* ── Supabase auth state listener ────────────────────────── */
+if (supabase) {
+  supabase.auth.getSession().then(({ data: { session } }) => {
+    currentUser = session?.user ?? null;
+    updateAuthUI(currentUser);
+    if (currentUser) loadFavourites();
+  });
+
+  supabase.auth.onAuthStateChange((_event, session) => {
+    currentUser = session?.user ?? null;
+    updateAuthUI(currentUser);
+    if (currentUser) {
+      loadFavourites().then(() => {
+        renderListings(sortListings(filteredListings, activeSort));
+      });
+    }
+  });
+}
