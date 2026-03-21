@@ -1,0 +1,10 @@
+{
+  "name": "firstnest",
+  "version": "0.1.0",
+  "description": "First-home search platform for Tampere, Finland.",
+  "private": true,
+  "scripts": {
+    "test": "echo \"No tests yet — TDD setup pending\""
+  },
+  "devDependencies": {}
+}
