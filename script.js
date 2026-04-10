@@ -8,6 +8,24 @@ const currency = new Intl.NumberFormat("fi-FI", {
 /* ── Auth + favourites state ─────────────────────────────── */
 let currentUser = null;
 const userFavourites = new Set(); // listing id strings
+const LOCAL_FAV_KEY = "firstnest_local_favourites";
+
+function loadLocalFavourites() {
+  try {
+    const raw = localStorage.getItem(LOCAL_FAV_KEY);
+    const items = raw ? JSON.parse(raw) : [];
+    userFavourites.clear();
+    items.forEach((item) => userFavourites.add(String(item)));
+  } catch {
+    userFavourites.clear();
+  }
+}
+
+function saveLocalFavourites() {
+  try {
+    localStorage.setItem(LOCAL_FAV_KEY, JSON.stringify([...userFavourites]));
+  } catch {}
+}
 
 /* ── Live listings (populated by initData on startup) ──── */
 let LIVE_LISTINGS = [];
@@ -203,6 +221,9 @@ function activateTab(id) {
   tabPanels.forEach((panel) => {
     panel.classList.toggle("is-active", panel.id === `tab-${id}`);
   });
+  if (id === "saved") {
+    renderSavedWatchlist();
+  }
 }
 
 tabBtns.forEach((btn) => {
@@ -551,6 +572,43 @@ function renderListings(listings) {
   renderMapSnapshot(listings);
 }
 
+function renderSavedWatchlist() {
+  const grid = document.getElementById("watchlistGrid");
+  if (!grid) return;
+
+  const savedListings = LIVE_LISTINGS.filter((listing) => userFavourites.has(String(listing.id)));
+  if (savedListings.length === 0) {
+    grid.innerHTML = `
+      <div class="listings-empty">
+        <strong>No saved homes yet</strong>
+        <p>${supabase ? "Sign in and click the heart icon on any listing to save it to your watchlist." : "Use the heart icon to save favourites locally in your browser."}</p>
+      </div>`;
+    return;
+  }
+
+  grid.innerHTML = savedListings.map(buildCard).join("");
+  grid.querySelectorAll(".prop-card").forEach((card) => {
+    card.addEventListener("click", () => {
+      selectedListingId = Number(card.dataset.id);
+      renderMapSnapshot(LIVE_LISTINGS);
+    });
+    card.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        selectedListingId = Number(card.dataset.id);
+        renderMapSnapshot(LIVE_LISTINGS);
+      }
+    });
+  });
+
+  grid.querySelectorAll(".fav-btn").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      toggleFavourite(String(btn.dataset.favId), btn);
+    });
+  });
+}
+
 /* ── Sorting ─────────────────────────────────────────────── */
 function sortListings(list, method) {
   const copy = [...list];
@@ -660,6 +718,10 @@ const budgetForm = document.getElementById("budgetForm");
 const homePriceEl = document.getElementById("homePrice");
 const loanAmountEl = document.getElementById("loanAmount");
 const resultNote = document.getElementById("resultNote");
+const visitorVisitsEl = document.getElementById("visitorVisits");
+const visitorFirstSeenEl = document.getElementById("visitorFirstSeen");
+const visitorIdEl = document.getElementById("visitorId");
+const analyticsQueueInfo = document.getElementById("analyticsQueueInfo");
 
 function calculateAffordablePrice(values) {
   const maxHousingShare = 0.35;
@@ -676,6 +738,84 @@ function calculateAffordablePrice(values) {
   const propertyPrice = principal + values.savings;
 
   return { principal, propertyPrice, monthlyBudget };
+}
+
+function getCookie(name) {
+  const match = document.cookie.match(new RegExp("(^|; )" + name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "=([^;]*)"));
+  return match ? decodeURIComponent(match[2]) : "";
+}
+
+function setCookie(name, value, days = 3650) {
+  const expires = new Date(Date.now() + days * 86400000).toUTCString();
+  document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax`;
+}
+
+function makeId() {
+  if (window.crypto?.randomUUID) return crypto.randomUUID();
+  return `vid-${Math.random().toString(36).slice(2)}-${Date.now().toString(36)}`;
+}
+
+function loadAnalyticsQueue() {
+  try {
+    return JSON.parse(localStorage.getItem("firstnest_analytics") || "[]");
+  } catch {
+    return [];
+  }
+}
+
+function saveAnalyticsQueue(items) {
+  localStorage.setItem("firstnest_analytics", JSON.stringify(items.slice(-100)));
+}
+
+function recordAnalyticsEvent(type, detail = {}) {
+  const queue = loadAnalyticsQueue();
+  queue.push({
+    id: makeId(),
+    type,
+    detail,
+    ts: new Date().toISOString(),
+  });
+  saveAnalyticsQueue(queue);
+  return queue.length;
+}
+
+function trackVisitorData() {
+  let visitorId = getCookie("firstnest_vid");
+  if (!visitorId) {
+    visitorId = makeId();
+    setCookie("firstnest_vid", visitorId);
+    setCookie("firstnest_first_visit", new Date().toISOString());
+  }
+
+  const firstVisit = getCookie("firstnest_first_visit") || new Date().toISOString();
+  const visits = Number(getCookie("firstnest_visits") || "0") + 1;
+  setCookie("firstnest_visits", String(visits));
+  setCookie("firstnest_last_visit", new Date().toISOString());
+
+  const eventCount = recordAnalyticsEvent("page_view", {
+    visitorId,
+    visits,
+    path: window.location.pathname,
+    userAgent: navigator.userAgent,
+  });
+
+  return { visitorId, firstVisit, visits, eventCount };
+}
+
+function updateVisitorInfo() {
+  const visitorData = trackVisitorData();
+  if (visitorVisitsEl) {
+    visitorVisitsEl.textContent = `Return visits: ${visitorData.visits}`;
+  }
+  if (visitorFirstSeenEl) {
+    visitorFirstSeenEl.textContent = `First seen: ${new Date(visitorData.firstVisit).toLocaleDateString("fi-FI")}`;
+  }
+  if (visitorIdEl) {
+    visitorIdEl.textContent = `Visitor ID: ${visitorData.visitorId}`;
+  }
+  if (analyticsQueueInfo) {
+    analyticsQueueInfo.textContent = `Local analytics queue: ${visitorData.eventCount} events stored in browser cookies and local storage.`;
+  }
 }
 
 function updateResults() {
@@ -742,6 +882,7 @@ function dbRowToListing(row) {
 }
 
 async function initData() {
+  loadLocalFavourites();
   if (supabase) {
     const { data, error } = await supabase
       .from("listings")
@@ -762,6 +903,7 @@ activateTab("listings");
 setBrowseView(activeBrowseView);
 initData();
 updateResults();
+updateVisitorInfo();
 
 /* ── Auth UI helpers ─────────────────────────────────────── */
 function updateAuthUI(user) {
@@ -841,29 +983,35 @@ function showAuthError(msg, type = "error") {
 
 /* ── Favourites ──────────────────────────────────────────── */
 async function loadFavourites() {
+  loadLocalFavourites();
   if (!supabase || !currentUser) return;
-  const { data } = await supabase
+
+  const { data, error } = await supabase
     .from("favourites")
     .select("listing_id")
     .eq("user_id", currentUser.id);
-  userFavourites.clear();
-  (data || []).forEach((row) => userFavourites.add(String(row.listing_id)));
+
+  if (!error && data) {
+    userFavourites.clear();
+    (data || []).forEach((row) => userFavourites.add(String(row.listing_id)));
+    saveLocalFavourites();
+  }
 }
 
 async function toggleFavourite(listingId, btnEl) {
-  if (!currentUser) { openAuthModal(); return; }
+  if (supabase && !currentUser) { openAuthModal(); return; }
   const isFav = userFavourites.has(listingId);
 
   if (isFav) {
     userFavourites.delete(listingId);
-    if (supabase) {
+    if (supabase && currentUser) {
       await supabase.from("favourites").delete()
         .eq("user_id", currentUser.id)
         .eq("listing_id", listingId);
     }
   } else {
     userFavourites.add(listingId);
-    if (supabase) {
+    if (supabase && currentUser) {
       await supabase.from("favourites").insert({
         user_id:    currentUser.id,
         listing_id: Number(listingId),
@@ -871,9 +1019,15 @@ async function toggleFavourite(listingId, btnEl) {
     }
   }
 
+  saveLocalFavourites();
+
   if (btnEl) {
     btnEl.classList.toggle("is-fav", !isFav);
     btnEl.setAttribute("aria-label", (!isFav ? "Remove from" : "Save to") + " favourites");
+  }
+
+  if (document.getElementById("tab-saved")?.classList.contains("is-active")) {
+    renderSavedWatchlist();
   }
 }
 

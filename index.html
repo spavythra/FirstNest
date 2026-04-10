@@ -35,6 +35,7 @@
 
     <nav class="topbar-tabs" role="tablist" aria-label="Main sections">
       <button class="tab-btn is-active" data-tab="listings" role="tab" aria-selected="true">Browse Homes</button>
+      <button class="tab-btn" data-tab="saved" role="tab" aria-selected="false">Saved Homes</button>
       <button class="tab-btn" data-tab="budget" role="tab" aria-selected="false">Budget &amp; Loan</button>
       <button class="tab-btn" data-tab="process" role="tab" aria-selected="false">Buying Process</button>
       <button class="tab-btn" data-tab="support" role="tab" aria-selected="false">Support</button>
@@ -213,6 +214,15 @@
         </div>
       </div>
 
+      <!-- TAB PANEL: Saved Homes -->
+      <div class="tab-panel" id="tab-saved" role="tabpanel">
+        <div class="panel-inner">
+          <h2 class="panel-title">Saved homes</h2>
+          <p class="panel-sub">Your favourites watchlist. Login to sync saved homes across devices.</p>
+          <div class="listings-grid" id="watchlistGrid"></div>
+        </div>
+      </div>
+
       <!-- TAB PANEL: Budget & Loan -->
       <div class="tab-panel" id="tab-budget" role="tabpanel">
         <div class="panel-inner">
@@ -247,6 +257,14 @@
                 Housing costs should stay below 35% of net monthly income for long-term stability.
               </div>
             </aside>
+
+            <section class="visitor-card" aria-live="polite" id="visitorCard">
+              <p class="visitor-card-title">Visitor analytics</p>
+              <p><strong id="visitorVisits">Return visits: —</strong></p>
+              <p id="visitorFirstSeen">First seen: —</p>
+              <p id="visitorId">Visitor ID: —</p>
+              <p id="analyticsQueueInfo" class="visitor-note">Cookies keep a simple analytics pipeline for return visits and local usage trends.</p>
+            </section>
           </div>
         </div>
       </div>
