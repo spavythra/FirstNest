@@ -6,7 +6,7 @@
   <title>FirstNest Tampere | Map and Ad Search for First Homes</title>
   <meta
     name="description"
-    content="Search Tampere homes through map or ad tiles, compare area health and crime trends, and follow a visual first-home buying guide."
+    content="Search Tampere homes through map or ad tiles, compare area health and buy averages, and follow a visual first-home buying guide."
   />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -75,6 +75,13 @@
       </section>
 
       <section class="filter-group">
+        <h2 class="filter-title">Keyword search</h2>
+        <label>Search term
+          <input type="text" id="filterKeyword" placeholder="e.g. sauna, balcony, city centre" />
+        </label>
+      </section>
+
+      <section class="filter-group">
         <h2 class="filter-title">Property</h2>
         <label>Type
           <select id="filterType">
@@ -117,6 +124,20 @@
       </section>
 
       <section class="filter-group">
+        <h2 class="filter-title">Features</h2>
+        <label class="toggle-label"><input type="checkbox" class="amenity-checkbox" data-amenity="Schools" /> Schools nearby</label>
+        <label class="toggle-label"><input type="checkbox" class="amenity-checkbox" data-amenity="Public Transport" /> Public transport</label>
+        <label class="toggle-label"><input type="checkbox" class="amenity-checkbox" data-amenity="Nature" /> Nature access</label>
+        <label class="toggle-label"><input type="checkbox" class="amenity-checkbox" data-amenity="Services" /> Shops & services</label>
+        <label class="toggle-label"><input type="checkbox" class="amenity-checkbox" data-amenity="Immigrant support" /> Immigrant support</label>
+      </section>
+
+      <section class="filter-group">
+        <h2 class="filter-title">Map search</h2>
+        <button type="button" class="btn-map-search" id="btnMapSearch">Search in current map area</button>
+      </section>
+
+      <section class="filter-group">
         <h2 class="filter-title">Area Aptness</h2>
         <p class="filter-hint">Personalise results by what matters to you.</p>
         <label class="toggle-label">
@@ -129,7 +150,7 @@
         </label>
         <label class="toggle-label">
           <input type="checkbox" id="aptSafety" />
-          <span>Low crime score</span>
+          <span>High buy average</span>
         </label>
         <label class="toggle-label">
           <input type="checkbox" id="aptServices" />
@@ -201,7 +222,7 @@
           <aside class="map-insights" id="mapInsights" aria-live="polite">
             <p class="map-kicker">Resident-reported district pulse</p>
             <h3>Select a Tampere district</h3>
-            <p class="map-copy">Compare health and crime signals from verified local resident reports.</p>
+            <p class="map-copy">Compare health and buy average signals from verified local resident reports.</p>
           </aside>
         </section>
 
@@ -299,7 +320,7 @@
               <div class="blog-copy">
                 <p class="blog-kicker">Chapter 3</p>
                 <h3>Offer with evidence, not emotion</h3>
-                <p>Use district-level health and crime trend signals, maintenance forecasts, and financing clauses. Push for full visibility on fees before deed signing.</p>
+                <p>Use district-level health and buy average signals, maintenance forecasts, and financing clauses. Push for full visibility on fees before deed signing.</p>
               </div>
             </article>
           </section>
@@ -326,7 +347,7 @@
                 <li><input type="checkbox" disabled /><span>Verify <strong>owned vs leased land</strong> and lease escalation clauses.</span></li>
                 <li><input type="checkbox" disabled /><span>Validate <strong>transfer tax rules</strong> and first-home buyer eligibility status.</span></li>
                 <li><input type="checkbox" disabled /><span>Read latest <strong>isannoitsijantodistus</strong> before final negotiation.</span></li>
-                <li><input type="checkbox" disabled /><span>Compare district <strong>health score and crime trend</strong> with resident report count.</span></li>
+                <li><input type="checkbox" disabled /><span>Compare district <strong>health score and buy average</strong> with resident report count.</span></li>
                 <li><input type="checkbox" disabled /><span>Confirm daycare queues, tram/bus coverage, and remote-work broadband reliability.</span></li>
               </ul>
             </article>

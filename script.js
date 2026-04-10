@@ -207,6 +207,33 @@ const POI_POINTS = [
 let realMap;
 let listingLayer;
 const poiLayers = {};
+let mapSearchBounds = null;
+
+function isWithinMapBounds(listing) {
+  if (!mapSearchBounds || !realMap) return true;
+  const latlng = getListingLatLng(listing);
+  return mapSearchBounds.contains(L.latLng(latlng));
+}
+
+function updateMapSearchButtonText(btn) {
+  if (!btn) return;
+  btn.textContent = mapSearchBounds ? "Clear map area filter" : "Search in current map area";
+  btn.classList.toggle("is-active", Boolean(mapSearchBounds));
+}
+
+function toggleMapSearchArea(btn) {
+  if (!realMap) {
+    alert("Open the map view first to search by map area.");
+    return;
+  }
+  if (mapSearchBounds) {
+    mapSearchBounds = null;
+  } else {
+    mapSearchBounds = realMap.getBounds();
+  }
+  updateMapSearchButtonText(btn);
+  applyFilters();
+}
 
 /* ── Tab switching ──────────────────────────────────────── */
 const tabBtns = Array.from(document.querySelectorAll(".tab-btn"));
@@ -412,13 +439,9 @@ function renderMapSnapshot(listings) {
   listingLayer.clearLayers();
 
   if (listings.length === 0) {
-    renderPoiMarkers();
     mapInsights.innerHTML = `
-      <p class="map-kicker">Resident-reported area pulse</p>
-      <h3>No area selected</h3>
-      <p class="map-copy">Adjust filters to bring back areas and review local resident reports.</p>
-      ${getPoiFiltersMarkup()}`;
-    bindPoiFilterHandlers(listings);
+      <p class="map-kicker">No homes found</p>
+      <p class="map-copy">Adjust search filters to see properties on the map.</p>`;
     renderMapAds([], null);
     return;
   }
@@ -433,13 +456,13 @@ function renderMapSnapshot(listings) {
     const isActive = listing.id === selected.id;
     const icon = L.divIcon({
       className: "",
-      html: `<span class="listing-logo-marker${isActive ? " is-active" : ""}">${listing.district}</span>`,
-      iconSize: [90, 22],
-      iconAnchor: [18, 11],
+      html: `<span class="listing-logo-marker${isActive ? " is-active" : ""}">🏠</span>`,
+      iconSize: [26, 26],
+      iconAnchor: [13, 13],
     });
 
     const marker = L.marker(latlng, { icon })
-      .bindTooltip(`${listing.title} - ${currency.format(listing.price)}`, { direction: "top" })
+      .bindTooltip(`${listing.title} — ${currency.format(listing.price)}`, { direction: "top", offset: [0, -12] })
       .on("click", () => {
         selectedListingId = listing.id;
         renderMapSnapshot(listings);
@@ -456,26 +479,9 @@ function renderMapSnapshot(listings) {
 
   const metrics = getResidentMetrics(selected);
   mapInsights.innerHTML = `
-    <p class="map-kicker">Resident-reported area pulse</p>
-    <h3>${selected.district}, ${selected.city}</h3>
-    <p class="map-copy">Updated from local resident submissions over the last 90 days.</p>
-    <div class="resident-metrics">
-      <div class="metric-tile">
-        <span class="metric-label">Wellness score</span>
-        <span class="metric-value">${metrics.wellness}/100</span>
-        <span class="metric-note">Resident quality-of-life rating</span>
-      </div>
-      <div class="metric-tile">
-        <span class="metric-label">Crime trend</span>
-        <span class="metric-value">${metrics.crimeIndex}/10</span>
-        <span class="metric-note">Lower is better</span>
-      </div>
-    </div>
-    <p class="map-copy">${metrics.reports} resident reports used in this summary.</p>
-    ${getPoiFiltersMarkup()}`;
+    <p class="map-kicker">${selected.district}, ${selected.city}</p>
+    <p class="map-copy">${metrics.reports} homes shown in the current area.</p>`;
 
-  renderPoiMarkers();
-  bindPoiFilterHandlers(listings);
   renderMapAds(listings, selected.id);
 }
 
@@ -523,8 +529,8 @@ function buildCard(listing) {
             <span>Resident wellness</span>
           </div>
           <div class="prop-community-item">
-            <strong>${metrics.crimeIndex}/10</strong>
-            <span>Crime trend</span>
+            <strong>${metrics.goodBuyAverage}/10</strong>
+            <span>Good buy average</span>
           </div>
         </div>
       </div>
@@ -636,6 +642,8 @@ function applyFilters() {
   const minPrice = Number(document.getElementById("filterMinPrice")?.value) || 0;
   const maxPrice = Number(document.getElementById("filterMaxPrice")?.value) || Infinity;
   const roomsVal = document.getElementById("filterRooms")?.value || "";
+  const keywordVal = (document.getElementById("filterKeyword")?.value || "").trim().toLowerCase();
+  const amenityChecks = Array.from(document.querySelectorAll(".amenity-checkbox:checked")).map((input) => input.dataset.amenity.toLowerCase());
 
   const aptChecks = [
     { id: "aptSchools", tag: "Schools" },
@@ -659,6 +667,15 @@ function applyFilters() {
     if (roomsVal && roomsVal !== "4+" && l.rooms !== Number(roomsVal)) return false;
     if (activeProfile !== "all" && !l.profile.includes(activeProfile)) return false;
     if (requiredTags.length > 0 && !requiredTags.every((t) => l.tags.includes(t))) return false;
+    if (keywordVal) {
+      const haystack = [l.title, l.city, l.district, l.description || ""].join(" ").toLowerCase();
+      if (!haystack.includes(keywordVal)) return false;
+    }
+    if (amenityChecks.length > 0) {
+      const tagText = l.tags.map((t) => t.toLowerCase());
+      if (!amenityChecks.every((amenity) => tagText.includes(amenity))) return false;
+    }
+    if (!isWithinMapBounds(l)) return false;
     const ageDays = Number(document.getElementById("filterAge")?.value) || 0;
     if (ageDays > 0 && !withinDays(l.created_at, ageDays)) return false;
     return true;
@@ -709,8 +726,13 @@ modeBtns.forEach((btn) => {
 
 /* ── Apply Filters button ────────────────────────────────── */
 const applyBtn = document.querySelector(".btn-apply-filters");
+const mapSearchBtn = document.getElementById("btnMapSearch");
 if (applyBtn) {
   applyBtn.addEventListener("click", applyFilters);
+}
+if (mapSearchBtn) {
+  updateMapSearchButtonText(mapSearchBtn);
+  mapSearchBtn.addEventListener("click", () => toggleMapSearchArea(mapSearchBtn));
 }
 
 /* ── Budget calculator ───────────────────────────────────── */
