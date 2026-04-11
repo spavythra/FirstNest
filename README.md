@@ -53,6 +53,16 @@ cd FirstNest
 
 ---
 
+## Deployment
+
+The app is deployed on Vercel at:
+
+- https://uusikoti.vercel.app/
+
+Production is currently served from the `master` branch.
+
+---
+
 ## AI Chat Integration
 
 This project now includes an AI chat assistant powered by OpenAI. The chat UI is available in the app under the **AI Chat** tab.
