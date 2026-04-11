@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FirstNest Tampere | Map and Ad Search for First Homes</title>
+  <title>FirstNest </title>
   <meta
     name="description"
     content="Search Tampere homes through map or ad tiles, compare area health, price/m², buyer profile fit, and follow a visual first-home buying guide."
@@ -34,32 +34,46 @@
     </a>
 
     <nav class="topbar-tabs" role="tablist" aria-label="Main sections">
-      <button class="tab-btn is-active" data-tab="listings" role="tab" aria-selected="true">Browse homes</button>
+      <button class="tab-btn is-active" data-tab="home" role="tab" aria-selected="true">Home</button>
+      <button class="tab-btn" data-tab="listings" role="tab" aria-selected="false">Browse homes</button>
       <button class="tab-btn" data-tab="budget" role="tab" aria-selected="false">Budget &amp; loan</button>
       <button class="tab-btn" data-tab="process" role="tab" aria-selected="false">Buying process</button>
       <button class="tab-btn" data-tab="support" role="tab" aria-selected="false">Support</button>
-      <button class="tab-btn" data-tab="chat" role="tab" aria-selected="false">AI chat</button>
     </nav>
 
     <div class="topbar-end">
-      <button class="btn-topbar-secondary hidden" id="topbarSavedBtn" type="button">Saved homes</button>
+      <button class="btn-topbar-cta" id="topbarSignInBtn">Sign in</button>
+      <button class="btn-topbar-burger hidden" id="topbarMenuBtn" aria-expanded="false" aria-label="Open personalization menu" type="button">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
       <div class="topbar-user-chip hidden" id="topbarUserChip" aria-live="polite">
         <span class="topbar-user-icon">FN</span>
         <span class="topbar-user-name" id="topbarUserName"></span>
       </div>
-      <button class="btn-topbar-ghost hidden" id="topbarSignOutBtn" type="button">Sign out</button>
-      <button class="btn-topbar-cta" id="signInBtn">Sign in</button>
-      <select class="lang-pick" aria-label="Language">
-        <option value="en">EN</option>
-        <option value="fi">FI</option>
-      </select>
+
+      <div class="topbar-menu-panel hidden" id="topbarMenuPanel" role="menu" aria-label="Personalization menu">
+        <button class="topbar-menu-item" id="menuSavedBtn" type="button">Saved homes</button>
+        <button class="topbar-menu-item" id="menuChatBtn" type="button">AI chat</button>
+        <div class="topbar-menu-profile hidden" id="menuProfileBtn">Signed in as <span id="menuProfileName">Member</span></div>
+        <div class="menu-language-row">
+          <label for="menuLangSelect">Language</label>
+          <select id="menuLangSelect" aria-label="Choose language">
+            <option value="en">EN</option>
+            <option value="fi">FI</option>
+          </select>
+        </div>
+        <button class="topbar-menu-item hidden" id="menuSignOutBtn" type="button">Sign out</button>
+        <button class="topbar-menu-item hidden" id="menuSignInBtn" type="button">Sign in</button>
+      </div>
     </div>
   </header>
 
   <!-- ═══════════════════════════════════════════════════════════
        APP BODY — sidebar + content panel
   ═══════════════════════════════════════════════════════════ -->
-  <div class="app-body">
+  <div class="app-body home-view">
 
     <!-- LEFT SIDEBAR: filters only -->
     <aside class="sidebar" aria-label="Search filters">
@@ -194,8 +208,43 @@
     <!-- MAIN CONTENT PANEL -->
     <main class="content-panel" id="mainPanel">
 
+      <!-- TAB PANEL: Home landing page -->
+      <div class="tab-panel is-active" id="tab-home" role="tabpanel">
+        <section class="home-hero compact">
+          <div class="hero-copy">
+            <p class="eyebrow">FirstNest</p>
+            <h1>Browse first-home properties without logging in.</h1>
+            <p>Search homes, select your area, and check the budget or buying process immediately. Login only when you want saved favourites, chat, or personalised features.</p>
+            <div class="hero-actions">
+              <button class="btn-hero-primary" type="button" id="heroLoginBtn">Login when ready</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="home-ads-preview">
+          <h2>Featured homes for first-time buyers</h2>
+          <div class="ads-grid">
+            <article class="home-ad-card">
+              <p class="ad-tag">City centre studio</p>
+              <h3>€169,000</h3>
+              <p>28 m² • 1 room • good transport</p>
+            </article>
+            <article class="home-ad-card">
+              <p class="ad-tag">Family-friendly apartment</p>
+              <h3>€289,000</h3>
+              <p>75 m² • 3 rooms • nearby schools</p>
+            </article>
+            <article class="home-ad-card">
+              <p class="ad-tag">Quiet row house</p>
+              <h3>€335,000</h3>
+              <p>92 m² • 4 rooms • yard & nature</p>
+            </article>
+          </div>
+        </section>
+      </div>
+
       <!-- TAB PANEL: Browse Homes -->
-      <div class="tab-panel is-active is-map-view" id="tab-listings" role="tabpanel">
+      <div class="tab-panel" id="tab-listings" role="tabpanel">
         <div class="panel-toolbar">
           <p class="results-count">Showing <strong id="resultsCount">8</strong> Tampere homes</p>
           <div class="browse-mode" role="group" aria-label="Browse mode">
@@ -293,65 +342,47 @@
       <!-- TAB PANEL: Buying Process -->
       <div class="tab-panel" id="tab-process" role="tabpanel">
         <div class="panel-inner process-panel">
-          <h2 class="panel-title">Buying Process Visual Blog</h2>
-          <p class="panel-sub">A story-style journey tailored to Tampere's housing realities.</p>
+          <h2 class="panel-title">Buying Process Workflow</h2>
+          <p class="panel-sub">A clear path for first-home buyers with a visual step flow and local Finnish process guidance.</p>
 
-          <section class="process-blog" aria-label="Visual process blog">
-            <article class="blog-chapter">
-              <div class="blog-visual visual-budget" aria-hidden="true"></div>
-              <div class="blog-copy">
-                <p class="blog-kicker">Chapter 1</p>
-                <h3>Set your Tampere-ready budget frame</h3>
-                <p>Anchor monthly limits first: loan, hoitovastike, transport, and energy seasonality. Compare Hervanta, Kaleva, and Pyynikki against commute and service quality.</p>
-              </div>
-            </article>
-
-            <article class="blog-chapter reverse">
-              <div class="blog-visual visual-docs" aria-hidden="true"></div>
-              <div class="blog-copy">
-                <p class="blog-kicker">Chapter 2</p>
-                <h3>Read the documents like an insider</h3>
-                <p>Inspect isannoitsijantodistus, renovation horizon, and yhtiolaina exposure. Factor in price/m², ongoing maintenance, and buyer profile fit to avoid hidden monthly burden jumps.</p>
-              </div>
-            </article>
-
-            <article class="blog-chapter">
-              <div class="blog-visual visual-offer" aria-hidden="true"></div>
-              <div class="blog-copy">
-                <p class="blog-kicker">Chapter 3</p>
-                <h3>Offer with evidence, not emotion</h3>
-                <p>Use district-level health, price/m² and buyer profile signals, maintenance forecasts, and financing clauses. Push for full visibility on fees before deed signing.</p>
-              </div>
-            </article>
+          <section class="process-infographic-placeholder" aria-label="Buying process infographic placeholder">
+            <div class="placeholder-card">
+              <h3>Infographic placeholder</h3>
+              <p>Placeholder for the buying process visual. This section has been cleared for later design updates.</p>
+            </div>
           </section>
 
-          <div class="process-columns">
-            <article class="process-card">
-              <h3>Tampere sequence (quick path)</h3>
-              <ol class="step-ladder">
-                <li><span>1</span>Budget + lender promise</li>
-                <li><span>2</span>Area shortlist by map pulse</li>
-                <li><span>3</span>Viewings + document audit</li>
-                <li><span>4</span>Offer strategy + condition clauses</li>
-                <li><span>5</span>Deed + insurance + utilities</li>
-                <li><span>6</span>90-day post-move budget control</li>
-              </ol>
+          <section class="process-details" aria-label="Buying process details">
+            <h3 class="detail-heading">Step-by-step explanations</h3>
+            <p class="detail-intro">The flowchart above shows the core stages. Below are in-depth action items for each step so buyers know what to do and why.</p>
+            <div class="process-steps">
+            <article class="process-card flow-card">
+              <div class="step-badge">1</div>
+              <h3>Budget & pre-approval</h3>
+              <p>Set a realistic price band, include monthly maintenance and energy costs, and secure a lender readiness signal before searching.</p>
             </article>
-
-            <article class="process-card">
-              <h3>Buyer checklist (Finland nuances)</h3>
-              <ul class="buyer-checklist">
-                <li><input type="checkbox" disabled /><span>Check <strong>housing company debt share</strong> and planned putkiremontti impact window.</span></li>
-                <li><input type="checkbox" disabled /><span>Review <strong>hoitovastike</strong>, water billing model, and heating inclusion details.</span></li>
-                <li><input type="checkbox" disabled /><span>Confirm <strong>energy class (E-luku)</strong> and winter electricity risk buffer.</span></li>
-                <li><input type="checkbox" disabled /><span>Verify <strong>owned vs leased land</strong> and lease escalation clauses.</span></li>
-                <li><input type="checkbox" disabled /><span>Validate <strong>transfer tax rules</strong> and first-home buyer eligibility status.</span></li>
-                <li><input type="checkbox" disabled /><span>Read latest <strong>isannoitsijantodistus</strong> before final negotiation.</span></li>
-                <li><input type="checkbox" disabled /><span>Compare district <strong>health score, price/m² fit, and renovation readiness</strong> with resident report count.</span></li>
-                <li><input type="checkbox" disabled /><span>Confirm daycare queues, tram/bus coverage, and remote-work broadband reliability.</span></li>
-              </ul>
+            <article class="process-card flow-card">
+              <div class="step-badge">2</div>
+              <h3>Shortlist districts</h3>
+              <p>Compare Tampere districts by commute, services, and local pulse to find the neighbourhood that fits your lifestyle.</p>
+            </article>
+            <article class="process-card flow-card">
+              <div class="step-badge">3</div>
+              <h3>Inspect documents</h3>
+              <p>Review yhtiölaina, putkiremontti plans, energy rating, and seller disclosures before making a decision.</p>
+            </article>
+            <article class="process-card flow-card">
+              <div class="step-badge">4</div>
+              <h3>Submit offer</h3>
+              <p>Make an evidence-based offer with clear conditions, fee transparency, and a backup plan for negotiation.</p>
+            </article>
+            <article class="process-card flow-card">
+              <div class="step-badge">5</div>
+              <h3>Move & settle</h3>
+              <p>Close the deal, arrange insurance and utilities, and plan the first 90 days of living costs and home maintenance.</p>
             </article>
           </div>
+          </section>
         </div>
       </div>
 

@@ -252,6 +252,104 @@ const LISTINGS = [
     areaScore: 78,
     profile: ["all", "finn"],
   },
+  {
+    id: 9,
+    title: "Family Home, Tampere Hervanta",
+    city: "Tampere",
+    district: "Hervanta",
+    price: 245000,
+    size: 98,
+    rooms: 4,
+    type: "townhouse",
+    badge: "Family",
+    tags: ["Schools", "Public Transport", "Services"],
+    areaScore: 84,
+    profile: ["all", "family"],
+  },
+  {
+    id: 10,
+    title: "Modern 2BR, Tampere Kaleva",
+    city: "Tampere",
+    district: "Kaleva",
+    price: 187000,
+    size: 64,
+    rooms: 2,
+    type: "apartment",
+    badge: null,
+    tags: ["Services", "Public Transport", "Schools"],
+    areaScore: 80,
+    profile: ["all", "immigrant", "family"],
+  },
+  {
+    id: 11,
+    title: "Loft Studio, Tampere Ratina",
+    city: "Tampere",
+    district: "Ratina",
+    price: 135000,
+    size: 40,
+    rooms: 1,
+    type: "studio",
+    badge: "City",
+    tags: ["Public Transport", "Services"],
+    areaScore: 76,
+    profile: ["all", "immigrant"],
+  },
+  {
+    id: 12,
+    title: "Quiet 3BR, Tampere Tammela",
+    city: "Tampere",
+    district: "Tammela",
+    price: 215000,
+    size: 80,
+    rooms: 3,
+    type: "apartment",
+    badge: null,
+    tags: ["Nature", "Services", "Schools"],
+    areaScore: 79,
+    profile: ["all", "family", "finn"],
+  },
+  {
+    id: 13,
+    title: "Character Home, Tampere Amuri",
+    city: "Tampere",
+    district: "Amuri",
+    price: 299000,
+    size: 92,
+    rooms: 3,
+    type: "apartment",
+    badge: "Charming",
+    tags: ["Nature", "Services", "Public Transport"],
+    areaScore: 83,
+    profile: ["all", "finn"],
+  },
+  {
+    id: 14,
+    title: "River-view 2BR, Tampere Hatanpää",
+    city: "Tampere",
+    district: "Hatanpää",
+    price: 229000,
+    size: 70,
+    rooms: 2,
+    type: "apartment",
+    badge: "Riverside",
+    tags: ["Nature", "Services"],
+    areaScore: 81,
+    profile: ["all", "immigrant", "family"],
+  },
+  {
+    id: 15,
+    title: "Compact 1BR, Tampere Sorsapuisto",
+    city: "Tampere",
+    district: "Sorsapuisto",
+    price: 124000,
+    size: 45,
+    rooms: 1,
+    type: "apartment",
+    badge: "Value",
+    tags: ["Public Transport", "Services"],
+    areaScore: 75,
+    profile: ["all", "immigrant"],
+  },
 ];
 
 /* ── State ──────────────────────────────────────────────── */
@@ -338,6 +436,8 @@ function activateTab(id) {
   tabPanels.forEach((panel) => {
     panel.classList.toggle("is-active", panel.id === `tab-${id}`);
   });
+  document.querySelector(".app-body")?.classList.toggle("home-view", id === "home");
+  document.querySelector(".sidebar")?.classList.toggle("hidden", id !== "listings");
   if (id === "saved") {
     renderSavedWatchlist();
   }
@@ -357,6 +457,11 @@ tabBtns.forEach((btn) => {
     }
   });
 });
+
+const heroBrowseBtn = document.getElementById("heroBrowseBtn");
+const heroBudgetBtn = document.getElementById("heroBudgetBtn");
+heroBrowseBtn?.addEventListener("click", () => activateTab("listings"));
+heroBudgetBtn?.addEventListener("click", () => activateTab("budget"));
 
 function getListingLatLng(listing) {
   if (LISTING_COORDS[listing.id]) {
@@ -1044,7 +1149,7 @@ async function initData() {
 }
 
 /* ── Init ─────────────────────────────────────────────────── */
-activateTab("listings");
+activateTab("home");
 setBrowseView(activeBrowseView);
 initData();
 updateResults();
@@ -1052,26 +1157,43 @@ updateVisitorInfo();
 
 /* ── Auth UI helpers ─────────────────────────────────────── */
 function updateAuthUI(user) {
-  const signInBtn         = document.getElementById("signInBtn");
+  const topbarSignInBtn   = document.getElementById("topbarSignInBtn");
+  const topbarMenuBtn     = document.getElementById("topbarMenuBtn");
   const topbarUserChip    = document.getElementById("topbarUserChip");
   const topbarUserName    = document.getElementById("topbarUserName");
-  const topbarSavedBtn    = document.getElementById("topbarSavedBtn");
-  const topbarSignOutBtn  = document.getElementById("topbarSignOutBtn");
+  const topbarMenuPanel   = document.getElementById("topbarMenuPanel");
+  const menuSignOutBtn    = document.getElementById("menuSignOutBtn");
+  const menuSignInBtn     = document.getElementById("menuSignInBtn");
+  const menuProfileBtn    = document.getElementById("menuProfileBtn");
+  const menuProfileName   = document.getElementById("menuProfileName");
   const postAdBtn         = document.getElementById("postAdBtn");
 
   if (user) {
-    signInBtn?.setAttribute("hidden", "");
-    topbarSignOutBtn?.classList.remove("hidden");
-    topbarSavedBtn?.classList.remove("hidden");
-    postAdBtn?.removeAttribute("hidden");
+    topbarSignInBtn?.classList.add("hidden");
+    topbarMenuBtn?.classList.remove("hidden");
+    menuSignInBtn?.classList.add("hidden");
+    menuSignOutBtn?.classList.remove("hidden");
+    menuProfileBtn?.classList.remove("hidden");
+    if (topbarMenuPanel) {
+      topbarMenuPanel.classList.add("hidden");
+      topbarMenuBtn?.setAttribute("aria-expanded", "false");
+    }
     if (topbarUserName && topbarUserChip) {
       topbarUserName.textContent = user.user_metadata?.full_name || user.email?.split("@")[0] || "Member";
       topbarUserChip.classList.remove("hidden");
     }
+    if (menuProfileName) {
+      menuProfileName.textContent = user.user_metadata?.full_name || user.email?.split("@")[0] || "Member";
+    }
+    postAdBtn?.removeAttribute("hidden");
   } else {
-    signInBtn?.removeAttribute("hidden");
-    topbarSignOutBtn?.classList.add("hidden");
-    topbarSavedBtn?.classList.add("hidden");
+    topbarSignInBtn?.classList.remove("hidden");
+    topbarMenuBtn?.classList.add("hidden");
+    topbarMenuPanel?.classList.add("hidden");
+    topbarMenuBtn?.setAttribute("aria-expanded", "false");
+    menuSignInBtn?.classList.remove("hidden");
+    menuSignOutBtn?.classList.add("hidden");
+    menuProfileBtn?.classList.add("hidden");
     postAdBtn?.setAttribute("hidden", "");
     if (topbarUserChip) {
       topbarUserChip.classList.add("hidden");
@@ -1259,9 +1381,40 @@ function showPostAdError(msg) {
 }
 
 /* ── Wire up modals & buttons ────────────────────────────── */
-document.getElementById("signInBtn")       ?.addEventListener("click", openAuthModal);
-document.getElementById("topbarSignOutBtn")?.addEventListener("click", doSignOut);
-document.getElementById("topbarSavedBtn")  ?.addEventListener("click", () => activateTab("saved"));
+const topbarSignInBtn   = document.getElementById("topbarSignInBtn");
+const topbarMenuBtn     = document.getElementById("topbarMenuBtn");
+const topbarMenuPanel   = document.getElementById("topbarMenuPanel");
+const menuSavedBtn      = document.getElementById("menuSavedBtn");
+const menuChatBtn       = document.getElementById("menuChatBtn");
+const menuSignOutBtn    = document.getElementById("menuSignOutBtn");
+const menuSignInBtn     = document.getElementById("menuSignInBtn");
+const menuLangSelect    = document.getElementById("menuLangSelect");
+
+topbarMenuBtn?.addEventListener("click", () => {
+  const expanded = topbarMenuBtn.getAttribute("aria-expanded") === "true";
+  topbarMenuBtn.setAttribute("aria-expanded", String(!expanded));
+  topbarMenuPanel?.classList.toggle("hidden");
+});
+
+document.addEventListener("click", (event) => {
+  const target = event.target;
+  if (!topbarMenuBtn || !topbarMenuPanel || topbarMenuPanel.classList.contains("hidden")) return;
+  if (target === topbarMenuBtn || topbarMenuBtn.contains(target) || topbarMenuPanel.contains(target)) return;
+  topbarMenuPanel.classList.add("hidden");
+  topbarMenuBtn.setAttribute("aria-expanded", "false");
+});
+
+menuSavedBtn?.addEventListener("click", () => { activateTab("saved"); topbarMenuPanel?.classList.add("hidden"); topbarMenuBtn?.setAttribute("aria-expanded", "false"); });
+menuChatBtn?.addEventListener("click", () => { activateTab("chat"); topbarMenuPanel?.classList.add("hidden"); topbarMenuBtn?.setAttribute("aria-expanded", "false"); });
+menuSignOutBtn?.addEventListener("click", () => { doSignOut(); topbarMenuPanel?.classList.add("hidden"); topbarMenuBtn?.setAttribute("aria-expanded", "false"); });
+menuSignInBtn?.addEventListener("click", () => { openAuthModal(); topbarMenuPanel?.classList.add("hidden"); topbarMenuBtn?.setAttribute("aria-expanded", "false"); });
+topbarSignInBtn?.addEventListener("click", openAuthModal);
+document.getElementById("heroLoginBtn")?.addEventListener("click", openAuthModal);
+menuLangSelect?.addEventListener("change", (event) => {
+  const value = event.target.value;
+  document.documentElement.lang = value;
+});
+
 document.getElementById("authModalClose")  ?.addEventListener("click", closeAuthModal);
 document.getElementById("authModal")       ?.addEventListener("click", (e) => { if (e.target === e.currentTarget) closeAuthModal(); });
 document.getElementById("signInGoogle")    ?.addEventListener("click", signInWithGoogle);
