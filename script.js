@@ -30,6 +30,96 @@ function saveLocalFavourites() {
 /* ── Live listings (populated by initData on startup) ──── */
 let LIVE_LISTINGS = [];
 
+const CHAT_HISTORY_KEY = "firstnest_ai_chat";
+let chatHistory = [];
+
+function loadChatHistory() {
+  try {
+    chatHistory = JSON.parse(localStorage.getItem(CHAT_HISTORY_KEY) || "[]");
+  } catch {
+    chatHistory = [];
+  }
+}
+
+function saveChatHistory() {
+  try {
+    localStorage.setItem(CHAT_HISTORY_KEY, JSON.stringify(chatHistory));
+  } catch {}
+}
+
+function renderChatMessages() {
+  const chatMessages = document.getElementById("chatMessages");
+  if (!chatMessages) return;
+
+  if (!chatHistory.length) {
+    chatMessages.innerHTML = '<div class="chat-placeholder">Ask your first question to the AI advisor.</div>';
+    return;
+  }
+
+  chatMessages.innerHTML = chatHistory
+    .map((message) => {
+      const roleClass = message.role === "user" ? "user" : "assistant";
+      const label = message.role === "user" ? "You" : "Advisor";
+      return `<div class="chat-message ${roleClass}"><span>${label}</span><div>${message.content}</div></div>`;
+    })
+    .join("");
+
+  const chatWindow = document.getElementById("chatWindow");
+  if (chatWindow) {
+    chatWindow.scrollTop = chatWindow.scrollHeight;
+  }
+}
+
+function appendChatMessage(role, content) {
+  chatHistory.push({ role, content, time: new Date().toISOString() });
+  saveChatHistory();
+  renderChatMessages();
+}
+
+function clearChatConversation() {
+  chatHistory = [];
+  saveChatHistory();
+  renderChatMessages();
+}
+
+async function sendChatRequest(message) {
+  const response = await fetch("/api/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message, history: chatHistory.slice(-10) }),
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data?.error || "Chat request failed");
+  }
+  return data.reply;
+}
+
+async function handleChatSubmit(event) {
+  event.preventDefault();
+  const input = document.getElementById("chatInput");
+  if (!input) return;
+
+  const userMessage = input.value.trim();
+  if (!userMessage) return;
+
+  appendChatMessage("user", userMessage);
+  input.value = "";
+  input.disabled = true;
+
+  try {
+    const reply = await sendChatRequest(userMessage);
+    appendChatMessage("assistant", reply);
+  } catch (error) {
+    appendChatMessage("assistant", "Sorry, the AI advisor is unavailable right now. Please try again later.");
+    console.error("Chat error:", error);
+  } finally {
+    input.disabled = false;
+    input.focus();
+  }
+}
+
 /* ── Time helpers ────────────────────────────────────────── */
 function timeAgo(isoString) {
   if (!isoString) return "";
@@ -251,6 +341,11 @@ function activateTab(id) {
   if (id === "saved") {
     renderSavedWatchlist();
   }
+  if (id === "chat") {
+    loadChatHistory();
+    renderChatMessages();
+    document.getElementById("chatInput")?.focus();
+  }
 }
 
 tabBtns.forEach((btn) => {
@@ -295,21 +390,44 @@ function ensureMap() {
   });
 }
 
-function getResidentMetrics(listing) {
-  const baseWellness = listing.areaScore * 0.78;
+function getPricePerSqm(listing) {
+  if (typeof listing.pricePerSqm === "number" && listing.pricePerSqm > 0) {
+    return Math.round(listing.pricePerSqm);
+  }
+  return listing.size > 0 ? Math.round(listing.price / listing.size) : 0;
+}
+
+function getResidentMetrics(listing, buyerProfile = "all") {
+  const baseWellness = listing.areaScore * 0.72;
   const bonus =
-    (listing.tags.includes("Nature") ? 8 : 0) +
+    (listing.tags.includes("Nature") ? 6 : 0) +
     (listing.tags.includes("Services") ? 5 : 0) +
     (listing.tags.includes("Public Transport") ? 5 : 0) +
-    (listing.tags.includes("Safety") ? 6 : 0);
+    (listing.tags.includes("Safety") ? 6 : 0) +
+    (buyerProfile === "immigrant" && listing.tags.includes("Immigrant support") ? 4 : 0) +
+    (buyerProfile === "family" && listing.tags.includes("Schools") ? 3 : 0);
 
-  const wellness = Math.min(99, Math.max(42, Math.round(baseWellness + bonus)));
-  const crimeIndex = Math.max(1.1, (10 - wellness / 11.5 + (listing.id % 3) * 0.4));
+  const wellness = Math.min(100, Math.max(42, Math.round(baseWellness + bonus)));
+  const pricePerSqm = getPricePerSqm(listing);
+  const valueSignalScore = Math.round(
+    Math.min(10, Math.max(1, (listing.areaScore * 0.12) + (95 / Math.max(pricePerSqm, 1)) * 1.5 + wellness / 18)) * 10
+  ) / 10;
+
+  const priceSignal =
+    pricePerSqm > 6000 ? "Costly buy" : pricePerSqm < 3800 ? "Good buy" : "Fair buy";
+  const profileFit = buyerProfile === "all"
+    ? "Broad buyer fit"
+    : listing.profile.includes(buyerProfile)
+    ? `Good for ${buyerProfile}`
+    : `Alternative for ${buyerProfile}`;
   const reports = 28 + listing.id * 7;
 
   return {
     wellness,
-    crimeIndex: crimeIndex.toFixed(1),
+    pricePerSqm,
+    goodBuyAverage: valueSignalScore.toFixed(1),
+    priceSignal,
+    profileFit,
     reports,
   };
 }
@@ -477,10 +595,10 @@ function renderMapSnapshot(listings) {
     realMap.setView(markerBounds[0], 13);
   }
 
-  const metrics = getResidentMetrics(selected);
+  const metrics = getResidentMetrics(selected, activeProfile);
   mapInsights.innerHTML = `
     <p class="map-kicker">${selected.district}, ${selected.city}</p>
-    <p class="map-copy">${metrics.reports} homes shown in the current area.</p>`;
+    <p class="map-copy">${metrics.reports} homes shown in the current area. Compare pricing/m², buyer profile fit, and renovation readiness before you decide whether this is a good buy or too costly.</p>`;
 
   renderMapAds(listings, selected.id);
 }
@@ -498,7 +616,7 @@ function buildCard(listing) {
   const scorePct = Math.min(100, Math.max(0, listing.areaScore));
   const scoreLabel =
     scorePct >= 85 ? "Excellent area" : scorePct >= 70 ? "Good area" : "Decent area";
-  const metrics = getResidentMetrics(listing);
+  const metrics = getResidentMetrics(listing, activeProfile);
 
   const isFav = userFavourites.has(String(listing.id));
   const timeLabel = listing.created_at ? `<span class="prop-time">${timeAgo(listing.created_at)}</span>` : "";
@@ -529,10 +647,15 @@ function buildCard(listing) {
             <span>Resident wellness</span>
           </div>
           <div class="prop-community-item">
+            <strong>€ ${metrics.pricePerSqm}</strong>
+            <span>Price / m²</span>
+          </div>
+          <div class="prop-community-item">
             <strong>${metrics.goodBuyAverage}/10</strong>
-            <span>Good buy average</span>
+            <span>${metrics.priceSignal}</span>
           </div>
         </div>
+        <p class="prop-profile-fit">${metrics.profileFit}</p>
       </div>
     </article>`;
 }
@@ -929,28 +1052,30 @@ updateVisitorInfo();
 
 /* ── Auth UI helpers ─────────────────────────────────────── */
 function updateAuthUI(user) {
-  const signInBtn  = document.getElementById("signInBtn");
-  const userChip   = document.getElementById("userChip");
-  const postAdBtn  = document.getElementById("postAdBtn");
-  const avatarImg  = document.getElementById("userAvatarImg");
-  const nameEl     = document.getElementById("userDisplayName");
+  const signInBtn         = document.getElementById("signInBtn");
+  const topbarUserChip    = document.getElementById("topbarUserChip");
+  const topbarUserName    = document.getElementById("topbarUserName");
+  const topbarSavedBtn    = document.getElementById("topbarSavedBtn");
+  const topbarSignOutBtn  = document.getElementById("topbarSignOutBtn");
+  const postAdBtn         = document.getElementById("postAdBtn");
 
   if (user) {
     signInBtn?.setAttribute("hidden", "");
-    userChip?.removeAttribute("hidden");
+    topbarSignOutBtn?.classList.remove("hidden");
+    topbarSavedBtn?.classList.remove("hidden");
     postAdBtn?.removeAttribute("hidden");
-    if (avatarImg && user.user_metadata?.avatar_url) {
-      avatarImg.src = user.user_metadata.avatar_url;
-      avatarImg.removeAttribute("hidden");
-    }
-    if (nameEl) {
-      nameEl.textContent = user.user_metadata?.full_name ||
-                           user.email?.split("@")[0] || "User";
+    if (topbarUserName && topbarUserChip) {
+      topbarUserName.textContent = user.user_metadata?.full_name || user.email?.split("@")[0] || "Member";
+      topbarUserChip.classList.remove("hidden");
     }
   } else {
     signInBtn?.removeAttribute("hidden");
-    userChip?.setAttribute("hidden", "");
+    topbarSignOutBtn?.classList.add("hidden");
+    topbarSavedBtn?.classList.add("hidden");
     postAdBtn?.setAttribute("hidden", "");
+    if (topbarUserChip) {
+      topbarUserChip.classList.add("hidden");
+    }
   }
 }
 
@@ -1135,10 +1260,11 @@ function showPostAdError(msg) {
 
 /* ── Wire up modals & buttons ────────────────────────────── */
 document.getElementById("signInBtn")       ?.addEventListener("click", openAuthModal);
+document.getElementById("topbarSignOutBtn")?.addEventListener("click", doSignOut);
+document.getElementById("topbarSavedBtn")  ?.addEventListener("click", () => activateTab("saved"));
 document.getElementById("authModalClose")  ?.addEventListener("click", closeAuthModal);
 document.getElementById("authModal")       ?.addEventListener("click", (e) => { if (e.target === e.currentTarget) closeAuthModal(); });
 document.getElementById("signInGoogle")    ?.addEventListener("click", signInWithGoogle);
-document.getElementById("signOutBtn")      ?.addEventListener("click", doSignOut);
 document.getElementById("postAdBtn")       ?.addEventListener("click", openPostAdModal);
 document.getElementById("postAdModalClose")?.addEventListener("click", closePostAdModal);
 document.getElementById("postAdCancel")    ?.addEventListener("click", closePostAdModal);
@@ -1159,6 +1285,9 @@ document.getElementById("authEmailForm")?.addEventListener("submit", (e) => {
   const pass  = document.getElementById("authPassword")?.value;
   signInWithEmail(email, pass);
 });
+
+document.getElementById("chatForm")?.addEventListener("submit", handleChatSubmit);
+document.getElementById("clearChatBtn")?.addEventListener("click", clearChatConversation);
 
 /* ── Supabase auth state listener ────────────────────────── */
 if (supabase) {

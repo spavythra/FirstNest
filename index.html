@@ -6,7 +6,7 @@
   <title>FirstNest Tampere | Map and Ad Search for First Homes</title>
   <meta
     name="description"
-    content="Search Tampere homes through map or ad tiles, compare area health and buy averages, and follow a visual first-home buying guide."
+    content="Search Tampere homes through map or ad tiles, compare area health, price/m², buyer profile fit, and follow a visual first-home buying guide."
   />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -34,25 +34,25 @@
     </a>
 
     <nav class="topbar-tabs" role="tablist" aria-label="Main sections">
-      <button class="tab-btn is-active" data-tab="listings" role="tab" aria-selected="true">Browse Homes</button>
-      <button class="tab-btn" data-tab="saved" role="tab" aria-selected="false">Saved Homes</button>
-      <button class="tab-btn" data-tab="budget" role="tab" aria-selected="false">Budget &amp; Loan</button>
-      <button class="tab-btn" data-tab="process" role="tab" aria-selected="false">Buying Process</button>
+      <button class="tab-btn is-active" data-tab="listings" role="tab" aria-selected="true">Browse homes</button>
+      <button class="tab-btn" data-tab="budget" role="tab" aria-selected="false">Budget &amp; loan</button>
+      <button class="tab-btn" data-tab="process" role="tab" aria-selected="false">Buying process</button>
       <button class="tab-btn" data-tab="support" role="tab" aria-selected="false">Support</button>
+      <button class="tab-btn" data-tab="chat" role="tab" aria-selected="false">AI chat</button>
     </nav>
 
     <div class="topbar-end">
+      <button class="btn-topbar-secondary hidden" id="topbarSavedBtn" type="button">Saved homes</button>
+      <div class="topbar-user-chip hidden" id="topbarUserChip" aria-live="polite">
+        <span class="topbar-user-icon">FN</span>
+        <span class="topbar-user-name" id="topbarUserName"></span>
+      </div>
+      <button class="btn-topbar-ghost hidden" id="topbarSignOutBtn" type="button">Sign out</button>
+      <button class="btn-topbar-cta" id="signInBtn">Sign in</button>
       <select class="lang-pick" aria-label="Language">
         <option value="en">EN</option>
         <option value="fi">FI</option>
       </select>
-      <button class="btn-topbar-secondary" id="postAdBtn" hidden>+ Post Ad</button>
-      <div class="user-chip" id="userChip" hidden>
-        <img class="user-avatar" id="userAvatarImg" src="" alt="" />
-        <span class="user-name" id="userDisplayName"></span>
-        <button class="btn-topbar-ghost" id="signOutBtn">Sign out</button>
-      </div>
-      <button class="btn-topbar-cta" id="signInBtn">Sign In</button>
     </div>
   </header>
 
@@ -61,7 +61,7 @@
   ═══════════════════════════════════════════════════════════ -->
   <div class="app-body">
 
-    <!-- LEFT SIDEBAR: all location & aptness filters -->
+    <!-- LEFT SIDEBAR: filters only -->
     <aside class="sidebar" aria-label="Search filters">
       <p class="sidebar-heading">Search &amp; Filters</p>
 
@@ -150,7 +150,7 @@
         </label>
         <label class="toggle-label">
           <input type="checkbox" id="aptSafety" />
-          <span>High buy average</span>
+          <span>High buyer value</span>
         </label>
         <label class="toggle-label">
           <input type="checkbox" id="aptServices" />
@@ -222,7 +222,7 @@
           <aside class="map-insights" id="mapInsights" aria-live="polite">
             <p class="map-kicker">Resident-reported district pulse</p>
             <h3>Select a Tampere district</h3>
-            <p class="map-copy">Compare health and buy average signals from verified local resident reports.</p>
+            <p class="map-copy">Compare health, price/m² and buyer profile fit signals from verified local resident reports.</p>
           </aside>
         </section>
 
@@ -311,7 +311,7 @@
               <div class="blog-copy">
                 <p class="blog-kicker">Chapter 2</p>
                 <h3>Read the documents like an insider</h3>
-                <p>Inspect isannoitsijantodistus, renovation horizon, and yhtiolaina exposure. Build a risk snapshot before any offer to avoid hidden monthly burden jumps.</p>
+                <p>Inspect isannoitsijantodistus, renovation horizon, and yhtiolaina exposure. Factor in price/m², ongoing maintenance, and buyer profile fit to avoid hidden monthly burden jumps.</p>
               </div>
             </article>
 
@@ -320,7 +320,7 @@
               <div class="blog-copy">
                 <p class="blog-kicker">Chapter 3</p>
                 <h3>Offer with evidence, not emotion</h3>
-                <p>Use district-level health and buy average signals, maintenance forecasts, and financing clauses. Push for full visibility on fees before deed signing.</p>
+                <p>Use district-level health, price/m² and buyer profile signals, maintenance forecasts, and financing clauses. Push for full visibility on fees before deed signing.</p>
               </div>
             </article>
           </section>
@@ -347,7 +347,7 @@
                 <li><input type="checkbox" disabled /><span>Verify <strong>owned vs leased land</strong> and lease escalation clauses.</span></li>
                 <li><input type="checkbox" disabled /><span>Validate <strong>transfer tax rules</strong> and first-home buyer eligibility status.</span></li>
                 <li><input type="checkbox" disabled /><span>Read latest <strong>isannoitsijantodistus</strong> before final negotiation.</span></li>
-                <li><input type="checkbox" disabled /><span>Compare district <strong>health score and buy average</strong> with resident report count.</span></li>
+                <li><input type="checkbox" disabled /><span>Compare district <strong>health score, price/m² fit, and renovation readiness</strong> with resident report count.</span></li>
                 <li><input type="checkbox" disabled /><span>Confirm daycare queues, tram/bus coverage, and remote-work broadband reliability.</span></li>
               </ul>
             </article>
@@ -360,6 +360,26 @@
         <div class="panel-inner">
           <h2 class="panel-title">Support &amp; Resources</h2>
           <p class="panel-sub">Practical help for every stage of your first-home journey.</p>
+          <section class="news-section" aria-label="Real estate news">
+            <h3 class="news-heading">Latest market news</h3>
+            <div class="news-grid">
+              <article class="news-card">
+                <p class="news-tag">Tampere market</p>
+                <h4>Housing demand stays strong in Tampere</h4>
+                <p>New buyer interest is high for central districts, while first-time buyer grants remain a key decision factor.</p>
+              </article>
+              <article class="news-card">
+                <p class="news-tag">Loan update</p>
+                <h4>Interest rate shift affects budget planning</h4>
+                <p>Families and newcomers are advised to lock lower fixed rates early and compare lender fee transparency.</p>
+              </article>
+              <article class="news-card">
+                <p class="news-tag">Housing policy</p>
+                <h4>Subsidies and first-home purchaser support</h4>
+                <p>Keep an eye on municipal benefits and eligibility updates that can reduce your down payment pressure.</p>
+              </article>
+            </div>
+          </section>
           <div class="support-grid">
             <article class="support-card">
               <h3>Language &amp; document readiness</h3>
@@ -398,6 +418,31 @@
               </ul>
             </article>
           </div>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="tab-chat" role="tabpanel">
+        <div class="panel-inner chat-panel">
+          <div class="chat-header">
+            <div>
+              <h2 class="panel-title">AI Home Advisor</h2>
+              <p class="panel-sub">Ask about neighbourhoods, loan readiness, buyer support, and Finland-specific first-home guidance.</p>
+            </div>
+            <button class="btn-link chat-clear" id="clearChatBtn" type="button">Clear conversation</button>
+          </div>
+
+          <div class="chat-window" id="chatWindow" aria-live="polite" role="log" aria-label="AI chat conversation">
+            <div class="chat-messages" id="chatMessages">
+              <div class="chat-placeholder">Ask your first question to the AI advisor.</div>
+            </div>
+          </div>
+
+          <form class="chat-form" id="chatForm">
+            <label class="screen-reader-only" for="chatInput">Ask the AI advisor</label>
+            <textarea id="chatInput" rows="3" placeholder="Ask about budgets, neighbourhood pulse, or first-time buyer guidance..." required></textarea>
+            <button type="submit" class="btn-primary">Send</button>
+          </form>
+          <p class="chat-note">AI chat works when `OPENAI_API_KEY` is configured in Vercel project settings. This call is proxied through a secure serverless function.</p>
         </div>
       </div>
 
