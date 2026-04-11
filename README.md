@@ -53,6 +53,18 @@ cd FirstNest
 
 ---
 
+## AI Chat Integration
+
+This project now includes an AI chat assistant powered by OpenAI. The chat UI is available in the app under the **AI Chat** tab.
+
+To enable the feature in Vercel, add the following environment variable in your project settings:
+
+- `OPENAI_API_KEY`
+
+The chat request is proxied through a secure serverless function in `api/chat.js`, so the API key is never exposed in the browser.
+
+---
+
 ## Repository Structure
 
 ```
