@@ -1,31 +1,31 @@
 # FirstNest
 
-A calm Nordic-style property platform prototype for first-time home buyers in Finland — built for both newcomers and Finnish citizens navigating the path to homeownership.
+A Nordic-style property platform for first-time home buyers in Finland, built for both newcomers and Finnish citizens navigating the path to homeownership.
 
-This project demonstrates product thinking, inclusive UX design, and front-end implementation quality — suitable for a portfolio, CV, and technical recruiter review.
+Live demo: https://uusikoti.vercel.app/
 
 ---
 
 ## Why This Project
 
-Buying a first home in Finland is complex. For immigrants, it involves additional layers of language barriers, eligibility uncertainty, and unfamiliar bureaucracy. For young Finnish buyers, loan transparency and municipality nuances remain confusing.
+Buying a first home in Finland is complex. For immigrants, it involves language barriers, eligibility uncertainty, and unfamiliar processes. For young Finnish buyers, loan terms and municipality differences are often unclear.
 
-FirstNest frames those challenges into a focused property browsing and guidance platform — combining listing discovery, budget analysis, a step-by-step roadmap, and curated support resources.
+FirstNest brings that into one focused platform: listing discovery, budget analysis, a step-by-step buying roadmap, and curated support resources.
 
 ---
 
 ## What It Does
 
-The app is structured like a real property platform (inspired by Etuovi and Oikotie) with four primary areas:
+The app is structured around four tabs, similar to platforms like Etuovi and Oikotie:
 
 | Tab | Purpose |
 |---|---|
-| **Browse Homes** | Filter and browse mock listings by city, type, price, size, and area aptness |
+| **Browse Homes** | Filter listings by city, type, price, size, and area signals |
 | **Budget & Loan** | Affordability calculator with Finnish market rate defaults |
-| **Buying Process** | 12-step first-home roadmap from search to keys |
+| **Buying Process** | 12-step roadmap from search to keys |
 | **Support** | Resources for legal, financial, multilingual, and immigrant buyer needs |
 
-**Sidebar filters** let users narrow by location, property type, price range, size, rooms, area aptness signals (schools, transport, services, nature, immigrant support), and buyer profile (All / Newcomer / Finnish / Family).
+Sidebar filters let users narrow by location, property type, price range, rooms, area aptness (schools, transport, nature, immigrant support), and buyer profile.
 
 ---
 
@@ -33,12 +33,26 @@ The app is structured like a real property platform (inspired by Etuovi and Oiko
 
 | Layer | Choice |
 |---|---|
-| Markup | HTML5 — semantic, ARIA-labelled |
-| Styles | CSS3 — custom property design system, app-shell layout |
-| Logic | Vanilla JavaScript ES6+ — no build tools or dependencies |
+| Markup | HTML5, semantic and ARIA-labelled |
+| Styles | CSS3, custom property design system, app-shell layout |
+| Logic | Vanilla JavaScript ES6+, no build tools or dependencies |
 | Fonts | Prata (display serif) + Manrope (UI body) via Google Fonts |
 
 No build tools required. Runs directly in-browser.
+
+---
+
+## AI Chat Integration
+
+Includes an AI chat assistant powered by OpenAI, available under the **AI Chat** tab.
+
+To enable in Vercel, set the environment variable:
+
+```
+OPENAI_API_KEY=your_key
+```
+
+The request is proxied through `api/chat.js` so the API key is never exposed in the browser.
 
 ---
 
@@ -48,30 +62,8 @@ No build tools required. Runs directly in-browser.
 git clone https://github.com/spavythra/FirstNest.git
 cd FirstNest
 # Open index.html in your browser
-# Or with VS Code Live Server for auto-reload
+# Or use VS Code Live Server for auto-reload
 ```
-
----
-
-## Deployment
-
-The app is deployed on Vercel at:
-
-- https://uusikoti.vercel.app/
-
-Production is currently served from the `master` branch.
-
----
-
-## AI Chat Integration
-
-This project now includes an AI chat assistant powered by OpenAI. The chat UI is available in the app under the **AI Chat** tab.
-
-To enable the feature in Vercel, add the following environment variable in your project settings:
-
-- `OPENAI_API_KEY`
-
-The chat request is proxied through a secure serverless function in `api/chat.js`, so the API key is never exposed in the browser.
 
 ---
 
@@ -79,41 +71,31 @@ The chat request is proxied through a secure serverless function in `api/chat.js
 
 ```
 FirstNest/
-├── index.html          # App shell — topbar, sidebar, tabbed content panels
+├── index.html          # App shell: topbar, sidebar, tabbed content
 ├── styles.css          # CSS design system and responsive layout
-├── script.js           # Tab switching, listing data, filters, budget calculator
+├── script.js           # Tab switching, listings, filters, budget calculator
+├── api/
+│   └── chat.js         # Serverless function for OpenAI chat proxy
 ├── Docs/
 │   └── requirements.md # Product vision, user segments, functional requirements
-├── CONTRIBUTING.md     # Branch workflow and conventional commit standards
+├── CONTRIBUTING.md     # Branch workflow and commit standards
 ├── CHANGELOG.md        # Versioned change log
 └── LICENSE             # MIT
 ```
 
 ---
 
-## Recruiter Notes
+## What This Showcases
 
-This repository intentionally showcases:
-
-- **Product thinking** — real user segments, clear problem framing, functional information architecture
-- **UI architecture** — fixed app-shell layout, sidebar + tabbed content, responsive breakpoints
-- **Feature implementation** — multi-criteria filtering, sort logic, budget calculator with financial guidance
-- **Data-driven rendering** — listings injected from a typed JS data array, not hardcoded HTML
-- **Accessibility** — ARIA roles, keyboard navigation, reduced-motion support
-- **Engineering discipline** — conventional commits, branch workflow, documented requirements, MIT license
-
----
-
-## Roadmap
-
-- [ ] Finnish / English language switch with JSON translation dictionary
-- [ ] Real listing data via public Finnish open-data API
-- [ ] Saved searches and favourites (localStorage)
-- [ ] Automated end-to-end tests with Playwright
-- [ ] CI pipeline: lint + format check + smoke test
+- **Product thinking:** real user segments, clear problem framing, functional information architecture
+- **UI architecture:** fixed app-shell layout, sidebar + tabbed content, responsive breakpoints
+- **Feature implementation:** multi-criteria filtering, sort logic, budget calculator
+- **Data-driven rendering:** listings rendered from a typed JS data array, not hardcoded HTML
+- **Accessibility:** ARIA roles, keyboard navigation, reduced-motion support
+- **Security:** API key proxied server-side, never exposed to the client
 
 ---
 
 ## License
 
-Released under the MIT License. See [`LICENSE`](LICENSE) for details.
+MIT License. See [LICENSE](LICENSE) for details.
