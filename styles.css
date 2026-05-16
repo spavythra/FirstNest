@@ -770,8 +770,14 @@ h3 {
   background: var(--surface);
   border: 1px solid var(--line-soft);
   border-radius: 18px;
-  padding: 1.1rem 1rem;
+  padding: 1.25rem 1.1rem;
   box-shadow: var(--shadow);
+  transition: box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+.home-ad-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
 }
 
 .home-ad-card h3 {
@@ -1291,10 +1297,6 @@ h3 {
   color: var(--brand-deep);
   font-weight: 700;
 }
-  display: block;
-  font-size: 0.68rem;
-  color: var(--muted);
-}
 
 .score-bar {
   flex: 1;
@@ -1524,33 +1526,6 @@ h3 {
   line-height: 1.5;
 }
 
-.visitor-card {
-  background: var(--surface-2);
-  border: 1px solid var(--line-soft);
-  border-radius: 16px;
-  padding: 1rem 1.1rem;
-  box-shadow: var(--shadow);
-  margin-top: 1rem;
-}
-
-.visitor-card-title {
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: var(--brand-deep);
-  margin-bottom: 0.85rem;
-}
-
-.visitor-card p {
-  color: var(--muted);
-  font-size: 0.88rem;
-  line-height: 1.55;
-  margin-bottom: 0.55rem;
-}
-
-.visitor-card strong {
-  color: var(--ink);
-}
-
 .timeline-list {
   list-style: none;
   display: grid;
@@ -1689,27 +1664,88 @@ h3 {
   margin-bottom: 2rem;
 }
 
-.process-infographic-placeholder {
+.process-roadmap {
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  border-radius: 18px;
+  padding: 2rem 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: var(--shadow);
+}
+
+.roadmap-track {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  position: relative;
+}
+
+.roadmap-step {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  gap: 0.65rem;
+}
+
+.roadmap-step:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 1.25rem;
+  left: 50%;
+  width: 100%;
+  height: 2px;
+  background: var(--line);
+  z-index: 0;
+}
+
+.roadmap-dot {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 999px;
+  background: var(--brand);
+  color: #fff;
+  font-weight: 700;
+  font-size: 1rem;
   display: grid;
   place-items: center;
-  padding: 2rem 1rem;
-  margin-bottom: 2rem;
-  background: var(--surface);
-  border: 1px dashed var(--line-soft);
-  border-radius: 18px;
-  box-shadow: var(--shadow);
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+}
+
+.roadmap-label {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--ink);
   text-align: center;
+  line-height: 1.35;
+  max-width: 7rem;
 }
 
-.process-infographic-placeholder h3 {
-  margin: 0 0 0.65rem;
-  font-size: 1.2rem;
-}
+@media (max-width: 600px) {
+  .roadmap-track {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.1rem;
+  }
 
-.process-infographic-placeholder p {
-  margin: 0;
-  color: var(--muted);
-  line-height: 1.8;
+  .roadmap-step {
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    gap: 0.85rem;
+  }
+
+  .roadmap-step:not(:last-child)::after {
+    display: none;
+  }
+
+  .roadmap-label {
+    text-align: left;
+    max-width: none;
+  }
 }
 
 .infographic-center {
@@ -1943,10 +1979,6 @@ h3 {
   .flow-node:last-child::after {
     display: none;
   }
-}
-  position: absolute;
-  border-radius: 999px;
-  filter: blur(1px);
 }
 
 .orb-a {
