@@ -85,17 +85,6 @@ FirstNest/
 
 ---
 
-## What This Showcases
-
-- **Product thinking:** real user segments, clear problem framing, functional information architecture
-- **UI architecture:** fixed app-shell layout, sidebar + tabbed content, responsive breakpoints
-- **Feature implementation:** multi-criteria filtering, sort logic, budget calculator
-- **Data-driven rendering:** listings rendered from a typed JS data array, not hardcoded HTML
-- **Accessibility:** ARIA roles, keyboard navigation, reduced-motion support
-- **Security:** API key proxied server-side, never exposed to the client
-
----
-
 ## License
 
 MIT License. See [LICENSE](LICENSE) for details.
