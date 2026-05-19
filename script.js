@@ -726,13 +726,15 @@ function buildCard(listing) {
   const isFav = userFavourites.has(String(listing.id));
   const timeLabel = listing.created_at ? `<span class="prop-time">${timeAgo(listing.created_at)}</span>` : "";
 
+  const photoUrl = `https://picsum.photos/seed/fn${listing.id}listing/400/260`;
+
   return `
     <article class="prop-card" data-id="${listing.id}" tabindex="0" role="article">
-      <div class="prop-card-img" aria-label="Property photo placeholder">
+      <div class="prop-card-img" aria-label="Property photo">
+        <img src="${photoUrl}" alt="${listing.title}" loading="lazy" class="prop-card-photo" />
         ${badge}
         ${timeLabel}
         <button class="fav-btn${isFav ? " is-fav" : ""}" data-fav-id="${listing.id}" aria-label="${isFav ? "Remove from" : "Save to"} favourites" title="Save">&#9825;</button>
-        Photo
       </div>
       <div class="prop-card-body">
         <p class="prop-price">${currency.format(listing.price)}</p>
@@ -763,6 +765,29 @@ function buildCard(listing) {
         <p class="prop-profile-fit">${metrics.profileFit}</p>
       </div>
     </article>`;
+}
+
+function buildFeaturedCard(listing) {
+  const photoUrl = `https://picsum.photos/seed/fn${listing.id}listing/400/260`;
+  return `
+    <article class="feat-card" data-id="${listing.id}" tabindex="0" role="article">
+      <img src="${photoUrl}" alt="${listing.title}" loading="lazy" class="feat-card-img" />
+      <div class="feat-card-body">
+        <p class="feat-card-price">${currency.format(listing.price)}</p>
+        <p class="feat-card-title">${listing.title}</p>
+        <p class="feat-card-meta">${listing.district}, ${listing.city} &nbsp;&middot;&nbsp; ${listing.rooms} rooms &nbsp;&middot;&nbsp; ${listing.size} m&sup2;</p>
+      </div>
+    </article>`;
+}
+
+function renderFeaturedListings() {
+  const grid = document.getElementById("featuredGrid");
+  if (!grid) return;
+  const featured = LIVE_LISTINGS.slice(0, 3);
+  grid.innerHTML = featured.map(buildFeaturedCard).join("");
+  grid.querySelectorAll(".feat-card").forEach((card) => {
+    card.addEventListener("click", () => activateTab("listings"));
+  });
 }
 
 function renderListings(listings) {
@@ -1141,11 +1166,13 @@ async function initData() {
     if (!error && data && data.length > 0) {
       LIVE_LISTINGS = data.map(dbRowToListing);
       applyFilters();
+      renderFeaturedListings();
       return;
     }
   }
   LIVE_LISTINGS = LISTINGS;
   applyFilters();
+  renderFeaturedListings();
 }
 
 /* ── Init ─────────────────────────────────────────────────── */
@@ -1441,6 +1468,35 @@ document.getElementById("authEmailForm")?.addEventListener("submit", (e) => {
 
 document.getElementById("chatForm")?.addEventListener("submit", handleChatSubmit);
 document.getElementById("clearChatBtn")?.addEventListener("click", clearChatConversation);
+
+/* ── Hero button wiring ──────────────────────────────────── */
+document.getElementById("heroSearchBtn")?.addEventListener("click", () => {
+  const keyword = document.getElementById("heroSearchInput")?.value.trim();
+  if (keyword) {
+    const filterKeyword = document.getElementById("filterKeyword");
+    if (filterKeyword) filterKeyword.value = keyword;
+    applyFilters();
+  }
+  activateTab("listings");
+});
+
+document.getElementById("heroSearchInput")?.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") document.getElementById("heroSearchBtn")?.click();
+});
+
+document.querySelectorAll(".hero-chip-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const filterType = document.getElementById("filterType");
+    if (filterType) filterType.value = btn.dataset.type || "";
+    applyFilters();
+    activateTab("listings");
+  });
+});
+
+document.getElementById("heroBrowseBtn")?.addEventListener("click", () => activateTab("listings"));
+document.getElementById("heroBudgetBtn")?.addEventListener("click", () => activateTab("budget"));
+document.getElementById("heroProcessBtn")?.addEventListener("click", () => activateTab("process"));
+document.getElementById("heroAdvisorBtn")?.addEventListener("click", () => activateTab("chat"));
 
 /* ── Supabase auth state listener ────────────────────────── */
 if (supabase) {

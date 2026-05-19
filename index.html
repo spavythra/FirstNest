@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FirstNest</title>
+  <title>FirstNest | Find your first home in Tampere</title>
   <meta
     name="description"
     content="Search Tampere homes through map or ad tiles, compare area health, price/m², buyer profile fit, and follow a visual first-home buying guide."
@@ -210,37 +210,79 @@
 
       <!-- TAB PANEL: Home landing page -->
       <div class="tab-panel is-active" id="tab-home" role="tabpanel">
-        <section class="home-hero compact">
-          <div class="hero-copy">
-            <p class="eyebrow">FirstNest</p>
-            <h1>Browse first-home properties without logging in.</h1>
-            <p>Search homes, select your area, and check the budget or buying process immediately. Login only when you want saved favourites, chat, or personalised features.</p>
-            <div class="hero-actions">
-              <button class="btn-hero-primary" type="button" id="heroLoginBtn">Login when ready</button>
+
+        <section class="site-hero">
+          <div class="hero-inner">
+            <p class="hero-eyebrow">Tampere &middot; First homes</p>
+            <h1 class="hero-h1">Find the home<br>that fits your life</h1>
+            <p class="hero-sub">Browse Tampere listings, compare districts, and get first-home guidance. No account needed.</p>
+            <div class="hero-search-bar">
+              <input id="heroSearchInput" type="text" placeholder="District, type, or keyword..." aria-label="Search homes" autocomplete="off" />
+              <button id="heroSearchBtn" type="button">Search</button>
+            </div>
+            <div class="hero-chips-row" role="group" aria-label="Filter by property type">
+              <button class="hero-chip-btn" data-type="studio" type="button">Studio</button>
+              <button class="hero-chip-btn" data-type="apartment" type="button">Apartment</button>
+              <button class="hero-chip-btn" data-type="rowhouse" type="button">Row house</button>
+              <button class="hero-chip-btn" data-type="house" type="button">Detached house</button>
             </div>
           </div>
         </section>
 
-        <section class="home-ads-preview">
-          <h2>Featured homes for first-time buyers</h2>
-          <div class="ads-grid">
-            <article class="home-ad-card">
-              <p class="ad-tag">City centre studio</p>
-              <h3>€169,000</h3>
-              <p>28 m² • 1 room • good transport</p>
-            </article>
-            <article class="home-ad-card">
-              <p class="ad-tag">Family-friendly apartment</p>
-              <h3>€289,000</h3>
-              <p>75 m² • 3 rooms • nearby schools</p>
-            </article>
-            <article class="home-ad-card">
-              <p class="ad-tag">Quiet row house</p>
-              <h3>€335,000</h3>
-              <p>92 m² • 4 rooms • yard & nature</p>
-            </article>
+        <div class="stats-bar">
+          <div class="stat-item">
+            <strong>15+</strong>
+            <span>Active listings</span>
           </div>
+          <div class="stat-item">
+            <strong>5</strong>
+            <span>Tampere districts</span>
+          </div>
+          <div class="stat-item">
+            <strong>Free</strong>
+            <span>No account needed</span>
+          </div>
+          <div class="stat-item">
+            <strong>AI</strong>
+            <span>Home advisor included</span>
+          </div>
+        </div>
+
+        <section class="home-featured">
+          <div class="home-featured-header">
+            <h2>Featured homes for first-time buyers</h2>
+            <button class="btn-browse-all" id="heroBrowseBtn" type="button">View all homes &rarr;</button>
+          </div>
+          <div class="featured-grid" id="featuredGrid"></div>
         </section>
+
+        <section class="home-callouts">
+          <article class="callout-card callout-budget">
+            <div class="callout-icon" aria-hidden="true">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+            </div>
+            <h3>Budget calculator</h3>
+            <p>Find your comfortable price range based on income, savings, and loan terms.</p>
+            <button class="callout-btn" id="heroBudgetBtn" type="button">Calculate now</button>
+          </article>
+          <article class="callout-card callout-process">
+            <div class="callout-icon" aria-hidden="true">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            </div>
+            <h3>Buying guide</h3>
+            <p>Step-by-step walkthrough of the Finnish home buying process from budget to keys.</p>
+            <button class="callout-btn" id="heroProcessBtn" type="button">See the steps</button>
+          </article>
+          <article class="callout-card callout-ai">
+            <div class="callout-icon" aria-hidden="true">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <h3>AI advisor</h3>
+            <p>Ask about neighbourhoods, loan readiness, and Finland-specific first-home guidance.</p>
+            <button class="callout-btn" id="heroAdvisorBtn" type="button">Ask the advisor</button>
+          </article>
+        </section>
+
       </div>
 
       <!-- TAB PANEL: Browse Homes -->
@@ -337,6 +379,56 @@
         <div class="panel-inner process-panel">
           <h2 class="panel-title">Buying Process Workflow</h2>
           <p class="panel-sub">A clear path for first-home buyers with a visual step flow and local Finnish process guidance.</p>
+
+          <section class="process-journey" aria-label="Visual buying journey">
+            <h3 class="journey-heading">Your path to the first home</h3>
+            <div class="journey-timeline">
+              <div class="journey-step">
+                <div class="journey-icon">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                </div>
+                <div class="journey-step-num">Step 1</div>
+                <div class="journey-label">Budget &amp; finance</div>
+                <p class="journey-desc">Set your price range and get pre-approval from a lender.</p>
+              </div>
+              <div class="journey-arrow" aria-hidden="true">&#8594;</div>
+              <div class="journey-step">
+                <div class="journey-icon">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                </div>
+                <div class="journey-step-num">Step 2</div>
+                <div class="journey-label">Find your home</div>
+                <p class="journey-desc">Browse districts, compare listings, and shortlist your favourites.</p>
+              </div>
+              <div class="journey-arrow" aria-hidden="true">&#8594;</div>
+              <div class="journey-step">
+                <div class="journey-icon">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                </div>
+                <div class="journey-step-num">Step 3</div>
+                <div class="journey-label">Check documents</div>
+                <p class="journey-desc">Review yhtiölaina, putkiremontti plans, and energy certificates.</p>
+              </div>
+              <div class="journey-arrow" aria-hidden="true">&#8594;</div>
+              <div class="journey-step">
+                <div class="journey-icon">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                </div>
+                <div class="journey-step-num">Step 4</div>
+                <div class="journey-label">Make your offer</div>
+                <p class="journey-desc">Submit an evidence-based offer with clear conditions and terms.</p>
+              </div>
+              <div class="journey-arrow" aria-hidden="true">&#8594;</div>
+              <div class="journey-step">
+                <div class="journey-icon">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                </div>
+                <div class="journey-step-num">Step 5</div>
+                <div class="journey-label">Move &amp; settle</div>
+                <p class="journey-desc">Close the deal, arrange utilities, and start your home chapter.</p>
+              </div>
+            </div>
+          </section>
 
           <section class="process-roadmap" aria-label="Five-step buying roadmap">
             <div class="roadmap-track">
