@@ -22,3 +22,8 @@ coverage/
 .env.*
 
 .vercel
+
+# Robot Framework
+tests/results/
+__pycache__/
+*.pyc
