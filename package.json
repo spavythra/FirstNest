@@ -4,10 +4,13 @@
   "description": "First-home search platform for Tampere, Finland.",
   "private": true,
   "scripts": {
-    "test":         "robot --outputdir tests/results tests/acceptance/",
-    "test:nav":     "robot --outputdir tests/results tests/acceptance/navigation.robot",
-    "test:search":  "robot --outputdir tests/results tests/acceptance/search.robot",
-    "test:calc":    "robot --outputdir tests/results tests/acceptance/mortgage_calculator.robot"
+    "test": "npm run test:unit && robot --outputdir tests/results tests/acceptance/",
+    "test:unit": "jest",
+    "test:nav": "robot --outputdir tests/results tests/acceptance/navigation.robot",
+    "test:search": "robot --outputdir tests/results tests/acceptance/search.robot",
+    "test:calc": "robot --outputdir tests/results tests/acceptance/mortgage_calculator.robot"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
 }
